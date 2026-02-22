@@ -15,7 +15,7 @@ Build infrastructure to:
 - **Model:** Qwen3-8B (instruct version, NOT base)
 - **Inference:** TransformerLens (`HookedTransformer.from_pretrained`)
 - **GPU:** Modal A100-80GB
-- **Dataset:** Com2Sense — 2,390 True/False statements in complementary pairs
+- **Dataset:** Com2Sense (tasksource/com2sense) — 2,390 True/False statements in complementary pairs
 - **Evaluation:** Compare logits for " True" vs " False" tokens at final position (no generation)
 - **Qwen3 Mode:** Non-thinking mode (`/no_think`) for clean residual streams
 - **dtype:** bfloat16
@@ -209,8 +209,8 @@ Before moving to Phase 2, verify:
 - Fallback models will be tried automatically
 
 ### Dataset Loading Fails
-- Verify HuggingFace dataset exists: `dali-does/com2sense`
-- Fallback names are tried: `com2sense/com2sense`, `com2sense`
++- Verify HuggingFace dataset exists: `tasksource/com2sense`
++- Fallback names are tried: `dali-does/com2sense`, `com2sense/com2sense`, `com2sense`
 - Check HF token is valid in Modal secret
 
 ### OOM Errors
@@ -232,7 +232,7 @@ The next phase will use the asymmetric pairs identified here to:
 
 ## References
 
-- **Com2Sense Dataset:** [HuggingFace](https://huggingface.co/datasets/dali-does/com2sense)
++- **Com2Sense Dataset:** [HuggingFace](https://huggingface.co/datasets/tasksource/com2sense)
 - **TransformerLens:** [GitHub](https://github.com/TransformerLensOrg/TransformerLens)
 - **Qwen3 Model:** [HuggingFace](https://huggingface.co/Qwen)
 - **Modal:** [Documentation](https://modal.com/docs)

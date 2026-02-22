@@ -5,7 +5,7 @@ All other modules import from this file.
 
 # Model Configuration
 MODEL_NAME = "Qwen/Qwen3-8B"  # Instruct version, NOT base
-DATASET_NAME = "dali-does/com2sense"  # Com2Sense dataset on HuggingFace
+DATASET_NAME = "tasksource/com2sense"  # Com2Sense dataset on HuggingFace
 
 # Paths and Storage
 RESULTS_DIR = "/root/comsense-circuits/results"
@@ -35,6 +35,7 @@ Answer:"""
 
 # Alternative dataset names to try if the primary one fails
 DATASET_NAME_FALLBACKS = [
+    "dali-does/com2sense",  # Original expected name
     "com2sense/com2sense",
     "com2sense",
 ]
