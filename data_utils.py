@@ -74,6 +74,41 @@ def load_com2sense() -> List[Dict[str, Any]]:
         normalized_examples.append(normalized)
 
     logger.info(f"Normalized {len(normalized_examples)} examples")
+
+    # Assign complementary pairs using adjacency heuristic
+    logger.info("\nAttempting to assign complementary pairs by adjacency...")
+    normalized_examples = assign_pairs_by_adjacency(normalized_examples)
+
+    # Count valid vs orphaned pairs
+    valid_count = sum(1 for ex in normalized_examples if ex['pair_id'] and not ex['pair_id'].startswith('orphan_'))
+    orphan_count = sum(1 for ex in normalized_examples if ex['pair_id'] and ex['pair_id'].startswith('orphan_'))
+
+    # If validity rate is low, try downloading pair_id files from GitHub
+    if valid_count > 0:
+        validity_rate = valid_count / len(normalized_examples)
+        logger.info(f"Adjacent pairing success rate: {validity_rate:.2%}")
+
+        if validity_rate < 0.80:
+            logger.warning("Low validity rate, attempting to download pair_id files from GitHub...")
+            try:
+                pair_ids_data = download_pair_ids()
+                if pair_ids_data:
+                    logger.info("Successfully downloaded pair_id data, but mapping not yet implemented")
+                    # TODO: Implement mapping from original_id to pair_id using downloaded data
+                    # For now, we'll use the adjacency-based pairing
+            except Exception as e:
+                logger.warning(f"Failed to download pair_id files: {e}")
+    else:
+        logger.warning("No valid pairs found through adjacency. Trying GitHub download...")
+        try:
+            pair_ids_data = download_pair_ids()
+            if pair_ids_data:
+                logger.info("Downloaded pair_id data, but mapping not yet implemented")
+        except Exception as e:
+            logger.warning(f"Failed to download pair_id files: {e}")
+
+    logger.info(f"\nFinal pair assignment: {valid_count} examples in valid pairs, {orphan_count} orphaned")
+
     return normalized_examples
 
 
@@ -81,77 +116,25 @@ def _normalize_example(example: Dict[str, Any], index: int) -> Dict[str, Any]:
     """
     Normalize dataset example to our expected format.
 
-    Handles variations in field names across different dataset versions.
+    Direct field mapping for tasksource/com2sense schema:
+    - sent: statement text
+    - id: unique hex ID
+    - scenario: "causal" or "comparison"
+    - label: "True" or "False" (STRING, not bool)
+    - domain: "time", "social", or "physical"
+    - numeracy: "True" or "False"
     """
-    normalized = {}
-
-    # Sentence text - try common field names
-    for field in ['sent', 'sentence', 'text', 'statement']:
-        if field in example:
-            normalized['sentence'] = example[field]
-            break
-
-    if 'sentence' not in normalized:
-        logger.warning(f"Example {index} missing sentence field. Keys: {example.keys()}")
-        normalized['sentence'] = str(example)
-
-    # Label (ground truth)
-    for field in ['label', 'answer', 'is_true', 'truth']:
-        if field in example:
-            value = example[field]
-            # Convert to boolean if needed
-            if isinstance(value, bool):
-                normalized['label'] = value
-            elif isinstance(value, str):
-                normalized['label'] = value.lower() in ['true', '1', 'yes']
-            elif isinstance(value, int):
-                normalized['label'] = bool(value)
-            else:
-                normalized['label'] = bool(value)
-            break
-
-    if 'label' not in normalized:
-        logger.warning(f"Example {index} missing label field")
-        normalized['label'] = False
-
-    # Domain
-    for field in ['domain', 'category', 'type']:
-        if field in example:
-            normalized['domain'] = str(example[field])
-            break
-
-    if 'domain' not in normalized:
-        normalized['domain'] = 'unknown'
-
-    # Scenario
-    for field in ['scenario', 'scenarios', 'context']:
-        if field in example:
-            normalized['scenario'] = str(example[field])
-            break
-
-    if 'scenario' not in normalized:
-        normalized['scenario'] = 'unknown'
-
-    # Pair ID - for grouping complementary pairs
-    for field in ['pair_id', 'pair', 'group_id', 'qid', 'question_id']:
-        if field in example:
-            normalized['pair_id'] = str(example[field])
-            break
-
-    if 'pair_id' not in normalized:
-        # If no pair_id, use a hash of the sentence as fallback
-        normalized['pair_id'] = f"auto_{hash(normalized['sentence']) % 1000000}"
-
-    # Example ID - unique identifier
-    for field in ['example_id', 'id', 'idx', 'index']:
-        if field in example:
-            normalized['example_id'] = str(example[field])
-            break
-
-    if 'example_id' not in normalized:
-        normalized['example_id'] = f"ex_{index}"
-
-    return normalized
+    return {
+        "sentence": example["sent"],
+        "label": example["label"] == "True",  # Convert string to bool
+        "domain": example["domain"],
+        "scenario": example["scenario"],
+        "numeracy": example.get("numeracy", "False") == "True",
+        "original_id": example["id"],
+        "example_id": f"ex_{index}",
+        # pair_id will be assigned separately
+        "pair_id": None,
+    }
 
 
 def format_prompt(sentence: str) -> str:
@@ -159,7 +142,7 @@ def format_prompt(sentence: str) -> str:
     Format a prompt for the model to classify a statement as True/False.
 
     Applies the PROMPT_TEMPLATE from config and prepends the SYSTEM_PROMPT
-    for Qwen3's non-thinking mode.
+    if it's not empty.
 
     Args:
         sentence: The statement to classify
@@ -170,10 +153,84 @@ def format_prompt(sentence: str) -> str:
     # Format the main prompt
     main_prompt = PROMPT_TEMPLATE.format(sentence=sentence)
 
-    # Prepend system prompt for Qwen3 non-thinking mode
-    full_prompt = f"{SYSTEM_PROMPT}\n\n{main_prompt}"
+    # Prepend system prompt if not empty
+    if SYSTEM_PROMPT:
+        full_prompt = f"{SYSTEM_PROMPT}\n\n{main_prompt}"
+    else:
+        full_prompt = main_prompt
 
     return full_prompt
+
+
+def assign_pairs_by_adjacency(examples: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Assign pair_ids by assuming adjacent examples form complementary pairs.
+    Validate that each pair has opposite labels, same domain, and same scenario.
+
+    Args:
+        examples: List of normalized examples
+
+    Returns:
+        Examples with pair_id field populated
+    """
+    valid_pairs = 0
+    invalid_pairs = 0
+
+    for i in range(0, len(examples) - 1, 2):
+        a = examples[i]
+        b = examples[i + 1]
+
+        # Validate: opposite labels, same domain, same scenario
+        if (a["label"] != b["label"] and
+            a["domain"] == b["domain"] and
+            a["scenario"] == b["scenario"]):
+            pair_id = f"pair_{i // 2}"
+            a["pair_id"] = pair_id
+            b["pair_id"] = pair_id
+            valid_pairs += 1
+        else:
+            # Not a valid complementary pair
+            a["pair_id"] = f"orphan_{i}"
+            b["pair_id"] = f"orphan_{i+1}"
+            invalid_pairs += 1
+
+    # Handle odd last element
+    if len(examples) % 2 == 1:
+        examples[-1]["pair_id"] = f"orphan_{len(examples)-1}"
+
+    logger.info(f"Adjacent pairing: {valid_pairs} valid pairs, {invalid_pairs} invalid pairs")
+
+    validity_rate = valid_pairs / (valid_pairs + invalid_pairs) if (valid_pairs + invalid_pairs) > 0 else 0
+    logger.info(f"Pair validity rate: {validity_rate:.2%}")
+
+    return examples
+
+
+def download_pair_ids() -> Dict[str, Any]:
+    """
+    Download pair_id files from original Com2Sense GitHub repo.
+
+    Returns:
+        Dictionary mapping split names to pair_id data
+    """
+    import urllib.request
+    import json
+
+    base_url = "https://raw.githubusercontent.com/PlusLabNLP/Com2Sense/master/data"
+    pair_ids = {}
+
+    for split in ["train", "dev"]:
+        url = f"{base_url}/pair_id_{split}.json"
+        try:
+            logger.info(f"Downloading pair_id_{split}.json from GitHub...")
+            with urllib.request.urlopen(url, timeout=10) as resp:
+                data = json.loads(resp.read().decode())
+                pair_ids[split] = data
+                logger.info(f"Successfully downloaded pair_id_{split}.json: {len(data)} entries")
+        except Exception as e:
+            logger.warning(f"Failed to download pair_id_{split}.json: {e}")
+
+    return pair_ids
 
 
 def get_complementary_pairs(examples: List[Dict[str, Any]]) -> List[Tuple[Dict[str, Any], Dict[str, Any]]]:
@@ -196,7 +253,8 @@ def get_complementary_pairs(examples: List[Dict[str, Any]]) -> List[Tuple[Dict[s
     pairs_by_id = defaultdict(list)
     for example in examples:
         pair_id = example['pair_id']
-        pairs_by_id[pair_id].append(example)
+        if pair_id and not pair_id.startswith('orphan_'):
+            pairs_by_id[pair_id].append(example)
 
     # Find complete complementary pairs
     complementary_pairs = []

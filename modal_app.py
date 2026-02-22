@@ -56,7 +56,6 @@ def run_evaluate() -> dict:
     Main GPU function that runs the behavioral evaluation.
 
     Loads the model, runs evaluation on Com2Sense dataset, and saves results.
-    Includes a smoke test at the start to verify everything is working.
 
     Returns:
         Dictionary with evaluation summary statistics
@@ -75,39 +74,6 @@ def run_evaluate() -> dict:
     logger.info("="*60)
     logger.info("Starting ComSense Circuits Behavioral Evaluation")
     logger.info("="*60)
-
-    # Smoke test: Try importing and loading model briefly
-    logger.info("\n[SMOKE TEST] Verifying model can be loaded...")
-    try:
-        from transformer_lens import HookedTransformer
-        import torch
-
-        logger.info(f"CUDA available: {torch.cuda.is_available()}")
-        logger.info(f"CUDA device count: {torch.cuda.device_count()}")
-        if torch.cuda.is_available():
-            logger.info(f"CUDA device name: {torch.cuda.get_device_name(0)}")
-
-        # Quick test - load model briefly and run one forward pass
-        logger.info("[SMOKE TEST] Loading model for smoke test...")
-        test_model = HookedTransformer.from_pretrained(
-            "Qwen/Qwen3-8B",
-            dtype="bfloat16",
-        )
-        logger.info("[SMOKE TEST] Model loaded successfully!")
-
-        # Run one test forward pass
-        test_logits = test_model("The sky is blue.")
-        logger.info(f"[SMOKE TEST] Forward pass successful, logits shape: {test_logits.shape}")
-
-        # Clean up
-        del test_model
-        torch.cuda.empty_cache()
-        logger.info("[SMOKE TEST] ✓ All checks passed!")
-
-    except Exception as e:
-        logger.error(f"[SMOKE TEST] ✗ Failed: {e}")
-        logger.error("Model loading failed. Check error message above.")
-        raise
 
     # Run the main evaluation script
     logger.info("\n[MAIN] Running behavioral evaluation...")

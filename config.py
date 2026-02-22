@@ -20,10 +20,9 @@ DTYPE = "bfloat16"
 TRUE_TOKEN = " True"
 FALSE_TOKEN = " False"
 
-# Qwen3 Non-Thinking Mode System Prompt
-# Qwen3 supports /no_think to disable chain-of-thought thinking mode
-# This is critical - we need direct representations, not CoT-contaminated residual streams
-SYSTEM_PROMPT = "/no_think"
+# Qwen3 System Prompt
+# Thinking mode doesn't activate on single forward passes, so we can leave this empty
+SYSTEM_PROMPT = ""
 
 # Prompt Template for True/False Classification
 # Keep it simple and direct. The model should answer with just "True" or "False".

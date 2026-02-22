@@ -157,12 +157,12 @@ def evaluate_example(
     result = {
         "example_id": example["example_id"],
         "sentence": example["sentence"],
-        "label": example["label"],  # ground truth (bool)
-        "predicted_true": predicted_true,
-        "correct": (predicted_true == example["label"]),
-        "true_logit": true_logit,
-        "false_logit": false_logit,
-        "confidence": confidence,
+        "label": bool(example["label"]),  # Force Python native bool
+        "predicted_true": bool(predicted_true),  # Force Python native bool
+        "correct": bool(predicted_true == example["label"]),  # Force Python native bool
+        "true_logit": float(true_logit),  # Force Python native float
+        "false_logit": float(false_logit),  # Force Python native float
+        "confidence": float(confidence),  # Force Python native float
         "domain": example["domain"],
         "scenario": example["scenario"],
         "pair_id": example["pair_id"],
@@ -413,19 +413,19 @@ def main() -> Dict[str, Any]:
     logger.info("ComSense Circuits - Behavioral Evaluation")
     logger.info("=" * 60)
 
-    # Step 1: Load model
-    logger.info("\n[1/5] Loading model...")
+    # Step 1: Load dataset (fail fast on dataset issues)
+    logger.info("\n[1/5] Loading dataset...")
+    examples = load_com2sense()
+    logger.info(f"Loaded {len(examples)} examples")
+
+    # Step 2: Load model
+    logger.info("\n[2/5] Loading model...")
     model, model_name = load_model()
     logger.info(f"Model loaded: {model_name}")
 
-    # Step 2: Verify tokens
-    logger.info("\n[2/5] Verifying tokens...")
+    # Step 3: Verify tokens
+    logger.info("\n[3/5] Verifying tokens...")
     true_token_id, false_token_id = verify_tokens(model)
-
-    # Step 3: Load dataset
-    logger.info("\n[3/5] Loading dataset...")
-    examples = load_com2sense()
-    logger.info(f"Loaded {len(examples)} examples")
 
     # Step 4: Run evaluation
     logger.info("\n[4/5] Running evaluation...")
