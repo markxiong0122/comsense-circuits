@@ -75,37 +75,34 @@ def load_com2sense() -> List[Dict[str, Any]]:
 
     logger.info(f"Normalized {len(normalized_examples)} examples")
 
-    # Assign complementary pairs using adjacency heuristic
-    logger.info("\nAttempting to assign complementary pairs by adjacency...")
-    normalized_examples = assign_pairs_by_adjacency(normalized_examples)
+    # Assign complementary pairs - try GitHub data first
+    logger.info("\nAttempting to assign complementary pairs...")
 
-    # Count valid vs orphaned pairs
+    try:
+        pair_ids_data = download_pair_ids()
+        if pair_ids_data:
+            logger.info("Successfully downloaded pair_id data from GitHub")
+            normalized_examples, valid_pairs, orphans = assign_pairs_from_github_data(
+                normalized_examples, pair_ids_data
+            )
+            logger.info(f"GitHub mapping: {valid_pairs} valid pairs, {orphans} orphans")
+
+            if valid_pairs > 0:
+                validity_rate = (2 * valid_pairs) / len(normalized_examples)
+                logger.info(f"Pair validity rate: {validity_rate:.2%}")
+            else:
+                logger.warning("GitHub mapping found no pairs, falling back to adjacency")
+                normalized_examples = assign_pairs_by_adjacency(normalized_examples)
+        else:
+            logger.warning("Could not download GitHub data, using adjacency heuristic")
+            normalized_examples = assign_pairs_by_adjacency(normalized_examples)
+    except Exception as e:
+        logger.warning(f"Failed to use GitHub data: {e}, falling back to adjacency")
+        normalized_examples = assign_pairs_by_adjacency(normalized_examples)
+
+    # Count final pair assignment
     valid_count = sum(1 for ex in normalized_examples if ex['pair_id'] and not ex['pair_id'].startswith('orphan_'))
     orphan_count = sum(1 for ex in normalized_examples if ex['pair_id'] and ex['pair_id'].startswith('orphan_'))
-
-    # If validity rate is low, try downloading pair_id files from GitHub
-    if valid_count > 0:
-        validity_rate = valid_count / len(normalized_examples)
-        logger.info(f"Adjacent pairing success rate: {validity_rate:.2%}")
-
-        if validity_rate < 0.80:
-            logger.warning("Low validity rate, attempting to download pair_id files from GitHub...")
-            try:
-                pair_ids_data = download_pair_ids()
-                if pair_ids_data:
-                    logger.info("Successfully downloaded pair_id data, but mapping not yet implemented")
-                    # TODO: Implement mapping from original_id to pair_id using downloaded data
-                    # For now, we'll use the adjacency-based pairing
-            except Exception as e:
-                logger.warning(f"Failed to download pair_id files: {e}")
-    else:
-        logger.warning("No valid pairs found through adjacency. Trying GitHub download...")
-        try:
-            pair_ids_data = download_pair_ids()
-            if pair_ids_data:
-                logger.info("Downloaded pair_id data, but mapping not yet implemented")
-        except Exception as e:
-            logger.warning(f"Failed to download pair_id files: {e}")
 
     logger.info(f"\nFinal pair assignment: {valid_count} examples in valid pairs, {orphan_count} orphaned")
 
@@ -233,6 +230,68 @@ def download_pair_ids() -> Dict[str, Any]:
     return pair_ids
 
 
+def assign_pairs_from_github_data(
+    examples: List[Dict[str, Any]],
+    pair_ids_data: Dict[str, Dict[str, str]]
+) -> Tuple[List[Dict[str, Any]], int, int]:
+    """
+    Assign pair_ids using the official GitHub pair_id mapping.
+
+    Args:
+        examples: List of normalized examples with original_id field
+        pair_ids_data: Dict mapping split names to pair_id mappings
+                       (e.g., {"train": {"id_a": "id_b", ...}, "dev": {...}})
+
+    Returns:
+        Tuple of (updated_examples, valid_pairs_count, orphan_count)
+    """
+    # Combine train and dev mappings into single lookup
+    combined_mapping = {}
+    for split_data in pair_ids_data.values():
+        combined_mapping.update(split_data)
+
+    logger.info(f"Combined GitHub mapping has {len(combined_mapping)} entries")
+
+    # Build lookup: original_id -> example
+    id_to_example = {ex["original_id"]: ex for ex in examples}
+    logger.info(f"Built lookup for {len(id_to_example)} unique original_ids")
+
+    # Track which examples have been paired
+    paired_ids = set()
+    pair_counter = 0
+
+    for example in examples:
+        orig_id = example["original_id"]
+
+        # Skip if already paired
+        if orig_id in paired_ids:
+            continue
+
+        # Look up the complementary ID
+        if orig_id in combined_mapping:
+            companion_id = combined_mapping[orig_id]
+
+            if companion_id in id_to_example:
+                # Found a valid pair
+                pair_id = f"pair_{pair_counter}"
+                example["pair_id"] = pair_id
+                id_to_example[companion_id]["pair_id"] = pair_id
+
+                paired_ids.add(orig_id)
+                paired_ids.add(companion_id)
+                pair_counter += 1
+            else:
+                # Companion not in our dataset (different split)
+                example["pair_id"] = f"orphan_{orig_id}"
+        else:
+            example["pair_id"] = f"orphan_{orig_id}"
+
+    valid_pairs = pair_counter
+    orphans = len(examples) - 2 * valid_pairs
+
+    return examples, valid_pairs, orphans
+
+
 def get_complementary_pairs(examples: List[Dict[str, Any]]) -> List[Tuple[Dict[str, Any], Dict[str, Any]]]:
     """
     Group examples by pair_id and return complementary pairs.
@@ -324,6 +383,3 @@ def verify_dataset_structure(examples: List[Dict[str, Any]]) -> None:
             logger.info(f"  [{i}] {ex['sentence'][:60]}... -> {ex['label']}")
 
     logger.info("=== End Verification ===")
-```
-
-✅ **Step 2 completed**: Created `data_utils.py` with dataset loading and prompt formatting utilities.

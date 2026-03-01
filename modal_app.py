@@ -107,8 +107,13 @@ def run_smoke_test() -> dict:
     Returns:
         Dictionary with smoke test results
     """
+    import sys
     import logging
     import torch
+
+    # Add local modules to path
+    sys.path.insert(0, "/root/comsense-circuits")
+
     from transformer_lens import HookedTransformer
     from config import MODEL_NAME, MODEL_NAME_FALLBACKS, DTYPE
 
@@ -285,6 +290,3 @@ def smoke_test():
         logger.error("\n✗ Smoke test FAILED!")
         for key, value in results.items():
             logger.error(f"  {key}: {value}")
-```
-
-✅ **Step 3 completed**: Created `modal_app.py` with Modal infrastructure including GPU setup, volume mounting, and smoke test functionality.

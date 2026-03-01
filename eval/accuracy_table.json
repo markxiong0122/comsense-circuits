@@ -1,0 +1,108 @@
+{
+  "overall": {
+    "accuracy": 0.702510460251046,
+    "total": 2390,
+    "correct": 1679
+  },
+  "by_domain": {
+    "time": {
+      "correct": 357,
+      "total": 536,
+      "accuracy": 0.6660447761194029
+    },
+    "social": {
+      "correct": 546,
+      "total": 794,
+      "accuracy": 0.6876574307304786
+    },
+    "physical": {
+      "correct": 614,
+      "total": 805,
+      "accuracy": 0.7627329192546584
+    },
+    "temporal": {
+      "correct": 162,
+      "total": 255,
+      "accuracy": 0.6352941176470588
+    }
+  },
+  "by_scenario": {
+    "causal": {
+      "correct": 845,
+      "total": 1198,
+      "accuracy": 0.7053422370617696
+    },
+    "comparison": {
+      "correct": 563,
+      "total": 804,
+      "accuracy": 0.7002487562189055
+    },
+    "comparative": {
+      "correct": 271,
+      "total": 387,
+      "accuracy": 0.7002583979328165
+    },
+    "physical": {
+      "correct": 0,
+      "total": 1,
+      "accuracy": 0.0
+    }
+  },
+  "cross_tab": {
+    "time_causal": {
+      "correct": 182,
+      "total": 268,
+      "accuracy": 0.6791044776119403
+    },
+    "social_causal": {
+      "correct": 276,
+      "total": 394,
+      "accuracy": 0.700507614213198
+    },
+    "social_comparison": {
+      "correct": 180,
+      "total": 268,
+      "accuracy": 0.6716417910447762
+    },
+    "physical_comparison": {
+      "correct": 208,
+      "total": 268,
+      "accuracy": 0.7761194029850746
+    },
+    "time_comparison": {
+      "correct": 175,
+      "total": 268,
+      "accuracy": 0.6529850746268657
+    },
+    "physical_causal": {
+      "correct": 299,
+      "total": 404,
+      "accuracy": 0.7400990099009901
+    },
+    "social_comparative": {
+      "correct": 90,
+      "total": 132,
+      "accuracy": 0.6818181818181818
+    },
+    "temporal_comparative": {
+      "correct": 74,
+      "total": 122,
+      "accuracy": 0.6065573770491803
+    },
+    "physical_comparative": {
+      "correct": 107,
+      "total": 133,
+      "accuracy": 0.8045112781954887
+    },
+    "temporal_causal": {
+      "correct": 88,
+      "total": 132,
+      "accuracy": 0.6666666666666666
+    },
+    "temporal_physical": {
+      "correct": 0,
+      "total": 1,
+      "accuracy": 0.0
+    }
+  }
+}

@@ -24,10 +24,6 @@ wheels/
 *.egg
 
 # Results and outputs
-results/
-*.json
-*.jsonl
-*.txt
 !requirements.txt
 
 # Jupyter Notebooks

@@ -1,0 +1,21 @@
+[project]
+name = "comsense-circuits"
+version = "0.1.0"
+description = "Mechanistic interpretability study of commonsense reasoning failures in LLMs"
+requires-python = ">=3.10"
+dependencies = [
+    "modal",
+    "datasets",
+    "transformer-lens",
+    "torch",
+    "transformers",
+    "accelerate",
+    "safetensors",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
