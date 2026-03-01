@@ -132,6 +132,9 @@ def run_smoke_test() -> dict:
         "model_loaded": False,
         "forward_pass_success": False,
         "tokens_verified": False,
+        "hook_extraction_success": False,
+        "n_layers": None,
+        "d_model": None,
     }
 
     # Check CUDA
@@ -213,6 +216,16 @@ def run_smoke_test() -> dict:
     except Exception as e:
         logger.error(f"✗ Token verification failed: {e}")
 
+    # Verify hook-based activation extraction
+    try:
+        logger.info("\nVerifying hook-based activation extraction...")
+        from evaluate import verify_hook_extraction
+        hook_results = verify_hook_extraction(model)
+        results.update(hook_results)
+        logger.info(f"✓ Hook extraction verified: {hook_results['n_layers']} layers, d_model={hook_results['d_model']}")
+    except Exception as e:
+        logger.error(f"✗ Hook extraction failed: {e}")
+
     # Clean up
     del model
     torch.cuda.empty_cache()
@@ -224,6 +237,86 @@ def run_smoke_test() -> dict:
     logger.info("="*60)
 
     return results
+
+
+@app.function(**SHARED_KWARGS)
+def run_extract_activations() -> dict:
+    """
+    GPU function that extracts residual stream activations for the 200
+    selected asymmetric pairs and saves them to the results volume.
+
+    Returns:
+        Dictionary with extraction summary statistics
+    """
+    import sys
+    import logging
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    logger = logging.getLogger(__name__)
+
+    logger.info("="*60)
+    logger.info("Starting Phase 2: Activation Extraction")
+    logger.info("="*60)
+
+    sys.path.insert(0, "/root/comsense-circuits")
+
+    try:
+        from extract_activations import main
+        results = main()
+
+        logger.info("\n[MAIN] Committing results to volume...")
+        results_vol.commit()
+
+        logger.info("\n[MAIN] ✓ Extraction completed successfully!")
+        return results
+
+    except Exception as e:
+        logger.error(f"\n[MAIN] ✗ Extraction failed: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
+
+
+@app.local_entrypoint()
+def extract_activations():
+    """
+    Local entrypoint to run activation extraction on Modal.
+
+    Usage:
+        modal run modal_app.py::extract_activations
+    """
+    import logging
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+    logger = logging.getLogger(__name__)
+
+    logger.info("Launching activation extraction on Modal...")
+    logger.info("This will:")
+    logger.info("  1. Load the 200 selected asymmetric pairs")
+    logger.info("  2. Run 400 forward passes with run_with_cache()")
+    logger.info("  3. Save resid_post [n_layers, d_model] per example")
+    logger.info("  4. Write activations.pt and activations_meta.json to results volume")
+    logger.info("")
+
+    results = run_extract_activations.remote()
+
+    logger.info("\n" + "="*60)
+    logger.info("Extraction Complete!")
+    logger.info("="*60)
+    logger.info(f"Model:      {results.get('model_name', 'N/A')}")
+    logger.info(f"n_layers:   {results.get('n_layers', 'N/A')}")
+    logger.info(f"d_model:    {results.get('d_model', 'N/A')}")
+    logger.info(f"Pairs:      {results.get('n_pairs', 'N/A')}")
+    logger.info(f"Examples:   {results.get('n_examples', 'N/A')}")
+    logger.info(f"Output:     {results.get('output_mb', 'N/A'):.1f} MB")
+    logger.info(f"\nResults saved to: /root/comsense-circuits/results/activations/")
+    logger.info("="*60)
 
 
 @app.local_entrypoint()
@@ -284,8 +377,15 @@ def smoke_test():
     logger.info("Running smoke test on Modal...")
     results = run_smoke_test.remote()
 
-    if results.get("model_loaded") and results.get("forward_pass_success"):
+    all_passed = (
+        results.get("model_loaded")
+        and results.get("forward_pass_success")
+        and results.get("tokens_verified")
+        and results.get("hook_extraction_success")
+    )
+    if all_passed:
         logger.info("\n✓ Smoke test PASSED!")
+        logger.info(f"  n_layers={results.get('n_layers')}, d_model={results.get('d_model')}")
     else:
         logger.error("\n✗ Smoke test FAILED!")
         for key, value in results.items():

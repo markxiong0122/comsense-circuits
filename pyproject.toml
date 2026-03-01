@@ -11,6 +11,9 @@ dependencies = [
     "transformers",
     "accelerate",
     "safetensors",
+    "scikit-learn",
+    "matplotlib",
+    "numpy",
 ]
 
 [tool.hatch.build.targets.wheel]

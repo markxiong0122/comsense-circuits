@@ -400,6 +400,61 @@ def save_results(
     logger.info(f"\nResults saved to {eval_dir}")
 
 
+def verify_hook_extraction(model: HookedTransformer) -> Dict[str, Any]:
+    """
+    Verify that TransformerLens hook-based activation extraction works correctly.
+
+    Runs a short forward pass with run_with_cache() and checks that residual
+    stream activations at each layer have the expected shape.
+
+    Args:
+        model: Loaded HookedTransformer model
+
+    Returns:
+        Dictionary with verification results including n_layers, d_model, shapes
+    """
+    logger.info("Verifying hook-based activation extraction...")
+
+    test_prompt = 'Is the following statement true or false? Respond with only "True" or "False".\n\nStatement: "The sky is blue."\n\nAnswer:'
+
+    with torch.no_grad():
+        logits, cache = model.run_with_cache(test_prompt)
+
+    n_layers = model.cfg.n_layers
+    d_model = model.cfg.d_model
+    seq_len = logits.shape[1]
+
+    logger.info(f"  Model config: n_layers={n_layers}, d_model={d_model}")
+    logger.info(f"  Sequence length: {seq_len}")
+
+    # Verify resid_post at each layer
+    shape_errors = []
+    for layer in range(n_layers):
+        resid = cache["resid_post", layer]
+        expected = (1, seq_len, d_model)
+        if tuple(resid.shape) != expected:
+            shape_errors.append(f"layer {layer}: got {tuple(resid.shape)}, expected {expected}")
+
+    if shape_errors:
+        raise ValueError(f"Hook shape mismatches: {shape_errors}")
+
+    # Extract final-token residual stream across all layers as a sanity check
+    final_token_stack = torch.stack(
+        [cache["resid_post", L][0, -1, :] for L in range(n_layers)]
+    )  # shape: [n_layers, d_model]
+
+    logger.info(f"  ✓ resid_post verified at all {n_layers} layers, shape [1, {seq_len}, {d_model}]")
+    logger.info(f"  ✓ Final-token stack shape: {list(final_token_stack.shape)}")
+
+    return {
+        "hook_extraction_success": True,
+        "n_layers": n_layers,
+        "d_model": d_model,
+        "seq_len": seq_len,
+        "final_token_stack_shape": list(final_token_stack.shape),
+    }
+
+
 def main() -> Dict[str, Any]:
     """
     Main evaluation function.
