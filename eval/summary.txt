@@ -1,0 +1,25 @@
+ComSense Circuits — Behavioral Evaluation Summary
+============================================================
+Model: Qwen/Qwen3-8B
+Total examples: 2390
+Overall accuracy: 0.7025 (1679/2390)
+
+By domain:
+  physical: 0.7627 (614/805)
+  social: 0.6877 (546/794)
+  temporal: 0.6353 (162/255)
+  time: 0.6660 (357/536)
+
+By scenario:
+  causal: 0.7053 (845/1198)
+  comparative: 0.7003 (271/387)
+  comparison: 0.7002 (563/804)
+  physical: 0.0000 (0/1)
+
+Complementary pair categories:
+  asymmetric: 611
+  both_correct: 534
+  both_wrong: 50
+
+Asymmetric pairs (target for patching): 611
+============================================================
