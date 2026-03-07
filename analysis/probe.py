@@ -29,7 +29,33 @@ from sklearn.preprocessing import StandardScaler
 
 
 def load_data(repo_dir: Path) -> tuple[dict, list]:
-    acts = torch.load(repo_dir / "activations", weights_only=False)
+    # Try local activations_dir first, then Modal volume path
+    act_candidates = [
+        repo_dir / "activations",
+        repo_dir / "activations_dir" / "activations",
+        repo_dir / "results" / "activations",
+    ]
+
+    # Also look for .pt files inside activation directories
+    acts = None
+    for p in act_candidates:
+        if p.is_dir():
+            pt_file = p / "activations.pt"
+            if pt_file.exists():
+                acts = torch.load(pt_file, weights_only=False)
+                break
+            # Try torch directory-format load
+            try:
+                acts = torch.load(p, weights_only=False)
+                break
+            except (IsADirectoryError, Exception):
+                continue
+        elif p.exists():
+            acts = torch.load(p, weights_only=False)
+            break
+    if acts is None:
+        raise FileNotFoundError(f"No activations found in: {act_candidates}")
+
     with open(repo_dir / "eval" / "selected_pairs_for_patching.json") as f:
         pairs = json.load(f)
     return acts, pairs

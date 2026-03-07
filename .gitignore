@@ -62,3 +62,7 @@ temp/
 .cache/
 models/
 checkpoints/
+
+# Downloaded results (large .pt files, kept in Modal volume)
+results_download/
+activations_dir/
