@@ -740,6 +740,64 @@ def patch_heads():
         logger.info(f"  L{h['layer']}.H{h['head']}: effect={h['mean_effect']:+.4f} flip_rate={h['flip_rate']:.3f}")
 
 
+@app.function(**SHARED_KWARGS)
+def run_mlp_attn_patching() -> dict:
+    """Run MLP vs attention sublayer patching on Modal GPU."""
+    import sys
+    import logging
+
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger(__name__)
+
+    logger.info("Starting MLP vs Attention Sublayer Patching")
+    sys.path.insert(0, "/root/comsense-circuits")
+
+    try:
+        from mlp_attn_patching import main
+        results = main()
+        results_vol.commit()
+        logger.info("MLP vs attention patching completed successfully!")
+        return results
+    except Exception as e:
+        logger.error(f"MLP vs attention patching failed: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
+
+
+@app.local_entrypoint()
+def mlp_attn_patch():
+    """
+    Run MLP vs attention sublayer patching.
+    Usage: uv run modal run modal_app.py::mlp_attn_patch
+    """
+    import logging
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger(__name__)
+
+    logger.info("Launching MLP vs attention sublayer patching on Modal...")
+    results = run_mlp_attn_patching.remote()
+
+    logger.info("\nMLP vs Attention Patching Complete!")
+    logger.info(f"Pairs processed: {results.get('n_pairs', 'N/A')}")
+    layer_summary = results.get("layer_summary", {})
+    logger.info(f"\n{'Layer':<8} {'Attn flip%':<14} {'Attn Δlogit':<16} {'MLP flip%':<14} {'MLP Δlogit'}")
+    logger.info("-" * 68)
+    for L in results.get("patch_layers", []):
+        s = layer_summary.get(str(L), {})
+        attn = s.get("attn", {})
+        mlp  = s.get("mlp", {})
+        logger.info(
+            f"  {L:<6d} "
+            f"{attn.get('flip_rate', 0)*100:>8.1f}%     "
+            f"{attn.get('mean_logit_change', 0):>+10.3f}       "
+            f"{mlp.get('flip_rate', 0)*100:>7.1f}%     "
+            f"{mlp.get('mean_logit_change', 0):>+10.3f}"
+        )
+    logger.info("\nDownload results:")
+    logger.info("  uv run modal volume get comsense-results /mlp_attn_patching ./local_results/mlp_attn_patching")
+
+
 @app.local_entrypoint()
 def launch_eval():
     """
