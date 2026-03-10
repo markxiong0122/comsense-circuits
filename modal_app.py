@@ -553,6 +553,48 @@ def run_head_probing() -> dict:
         raise
 
 
+@app.function(**SHARED_KWARGS)
+def run_mean_ablation() -> dict:
+    """Run mean-ablation study on Modal GPU."""
+    import sys
+    import logging
+
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger(__name__)
+
+    logger.info("Starting Mean-Ablation Study")
+    sys.path.insert(0, "/root/comsense-circuits")
+
+    try:
+        from mean_ablation import main
+        results = main()
+        results_vol.commit()
+        logger.info("Mean-ablation completed successfully!")
+        return results
+    except Exception as e:
+        logger.error(f"Mean-ablation failed: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
+
+
+@app.local_entrypoint()
+def ablation():
+    """Run mean-ablation study. Usage: modal run modal_app.py::ablation"""
+    import logging
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger(__name__)
+
+    logger.info("Launching mean-ablation on Modal...")
+    result = run_mean_ablation.remote()
+
+    logger.info("\nMean-Ablation Results:")
+    for key, data in result.get("head_summary", {}).items():
+        logger.info(f"  {key}: flip_rate={data['flip_rate']:.3f} "
+                   f"mean_logit_change={data['mean_logit_change']:+.4f}")
+    logger.info("\nDone! Download: uv run modal volume get comsense-results /ablation ./results_download/ablation")
+
+
 @app.local_entrypoint()
 def l2_sweep():
     """Run just the L2 regularization sweep. Usage: modal run modal_app.py::l2_sweep"""

@@ -1,0 +1,473 @@
+{
+  "model_name": "Qwen/Qwen3-8B",
+  "n_pairs": 200,
+  "target_heads": [
+    {
+      "layer": 20,
+      "head": 8
+    },
+    {
+      "layer": 21,
+      "head": 19
+    },
+    {
+      "layer": 26,
+      "head": 26
+    },
+    {
+      "layer": 26,
+      "head": 25
+    },
+    {
+      "layer": 19,
+      "head": 31
+    },
+    {
+      "layer": 18,
+      "head": 16
+    },
+    {
+      "layer": 21,
+      "head": 15
+    },
+    {
+      "layer": 21,
+      "head": 16
+    },
+    {
+      "layer": 18,
+      "head": 6
+    },
+    {
+      "layer": 20,
+      "head": 9
+    },
+    {
+      "layer": 32,
+      "head": 20
+    },
+    {
+      "layer": 34,
+      "head": 18
+    },
+    {
+      "layer": 28,
+      "head": 11
+    },
+    {
+      "layer": 24,
+      "head": 11
+    },
+    {
+      "layer": 28,
+      "head": 25
+    },
+    {
+      "layer": 32,
+      "head": 12
+    },
+    {
+      "layer": 35,
+      "head": 23
+    }
+  ],
+  "head_summary": {
+    "L20.H8": {
+      "total": 200,
+      "flips": 1,
+      "flip_rate": 0.005,
+      "mean_logit_change": 0.003125,
+      "median_logit_change": 0.0,
+      "std_logit_change": 0.18558922214126553,
+      "source": "patching"
+    },
+    "L21.H19": {
+      "total": 200,
+      "flips": 1,
+      "flip_rate": 0.005,
+      "mean_logit_change": -0.014375,
+      "median_logit_change": 0.0,
+      "std_logit_change": 0.12635360847637078,
+      "source": "patching"
+    },
+    "L26.H26": {
+      "total": 200,
+      "flips": 1,
+      "flip_rate": 0.005,
+      "mean_logit_change": 0.01375,
+      "median_logit_change": 0.0,
+      "std_logit_change": 0.1560198304703604,
+      "source": "patching"
+    },
+    "L26.H25": {
+      "total": 200,
+      "flips": 2,
+      "flip_rate": 0.01,
+      "mean_logit_change": 0.006875,
+      "median_logit_change": 0.0,
+      "std_logit_change": 0.15268303564902028,
+      "source": "patching"
+    },
+    "L19.H31": {
+      "total": 200,
+      "flips": 1,
+      "flip_rate": 0.005,
+      "mean_logit_change": -0.005625,
+      "median_logit_change": 0.0,
+      "std_logit_change": 0.09625608746983225,
+      "source": "patching"
+    },
+    "L18.H16": {
+      "total": 200,
+      "flips": 0,
+      "flip_rate": 0.0,
+      "mean_logit_change": 0.023125,
+      "median_logit_change": 0.0,
+      "std_logit_change": 0.0801146639199092,
+      "source": "patching"
+    },
+    "L21.H15": {
+      "total": 200,
+      "flips": 0,
+      "flip_rate": 0.0,
+      "mean_logit_change": -0.0025,
+      "median_logit_change": 0.0,
+      "std_logit_change": 0.09759610647971567,
+      "source": "patching"
+    },
+    "L21.H16": {
+      "total": 200,
+      "flips": 1,
+      "flip_rate": 0.005,
+      "mean_logit_change": -0.00125,
+      "median_logit_change": 0.0,
+      "std_logit_change": 0.08384323168867003,
+      "source": "patching"
+    },
+    "L18.H6": {
+      "total": 200,
+      "flips": 0,
+      "flip_rate": 0.0,
+      "mean_logit_change": 0.028125,
+      "median_logit_change": 0.0,
+      "std_logit_change": 0.08143008887997115,
+      "source": "patching"
+    },
+    "L20.H9": {
+      "total": 200,
+      "flips": 0,
+      "flip_rate": 0.0,
+      "mean_logit_change": 0.00125,
+      "median_logit_change": 0.0,
+      "std_logit_change": 0.08837950837156767,
+      "source": "patching"
+    },
+    "L32.H20": {
+      "total": 200,
+      "flips": 0,
+      "flip_rate": 0.0,
+      "mean_logit_change": 0.0025,
+      "median_logit_change": 0.0,
+      "std_logit_change": 0.06726812023536854,
+      "source": "probing"
+    },
+    "L34.H18": {
+      "total": 200,
+      "flips": 0,
+      "flip_rate": 0.0,
+      "mean_logit_change": 0.001875,
+      "median_logit_change": 0.0,
+      "std_logit_change": 0.06900803848103494,
+      "source": "probing"
+    },
+    "L28.H11": {
+      "total": 200,
+      "flips": 0,
+      "flip_rate": 0.0,
+      "mean_logit_change": 0.00625,
+      "median_logit_change": 0.0,
+      "std_logit_change": 0.07473912964438374,
+      "source": "probing"
+    },
+    "L24.H11": {
+      "total": 200,
+      "flips": 0,
+      "flip_rate": 0.0,
+      "mean_logit_change": 0.00125,
+      "median_logit_change": 0.0,
+      "std_logit_change": 0.07805246632874582,
+      "source": "probing"
+    },
+    "L28.H25": {
+      "total": 200,
+      "flips": 1,
+      "flip_rate": 0.005,
+      "mean_logit_change": -0.004375,
+      "median_logit_change": 0.0,
+      "std_logit_change": 0.07329041120774259,
+      "source": "probing"
+    },
+    "L32.H12": {
+      "total": 200,
+      "flips": 0,
+      "flip_rate": 0.0,
+      "mean_logit_change": 0.0025,
+      "median_logit_change": 0.0,
+      "std_logit_change": 0.07495832175282474,
+      "source": "probing"
+    },
+    "L35.H23": {
+      "total": 200,
+      "flips": 0,
+      "flip_rate": 0.0,
+      "mean_logit_change": -0.00625,
+      "median_logit_change": 0.0,
+      "std_logit_change": 0.07261843774138907,
+      "source": "probing"
+    }
+  },
+  "top_by_flip_rate": [
+    [
+      "L26.H25",
+      {
+        "total": 200,
+        "flips": 2,
+        "flip_rate": 0.01,
+        "mean_logit_change": 0.006875,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.15268303564902028,
+        "source": "patching"
+      }
+    ],
+    [
+      "L20.H8",
+      {
+        "total": 200,
+        "flips": 1,
+        "flip_rate": 0.005,
+        "mean_logit_change": 0.003125,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.18558922214126553,
+        "source": "patching"
+      }
+    ],
+    [
+      "L21.H19",
+      {
+        "total": 200,
+        "flips": 1,
+        "flip_rate": 0.005,
+        "mean_logit_change": -0.014375,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.12635360847637078,
+        "source": "patching"
+      }
+    ],
+    [
+      "L26.H26",
+      {
+        "total": 200,
+        "flips": 1,
+        "flip_rate": 0.005,
+        "mean_logit_change": 0.01375,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.1560198304703604,
+        "source": "patching"
+      }
+    ],
+    [
+      "L19.H31",
+      {
+        "total": 200,
+        "flips": 1,
+        "flip_rate": 0.005,
+        "mean_logit_change": -0.005625,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.09625608746983225,
+        "source": "patching"
+      }
+    ],
+    [
+      "L21.H16",
+      {
+        "total": 200,
+        "flips": 1,
+        "flip_rate": 0.005,
+        "mean_logit_change": -0.00125,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.08384323168867003,
+        "source": "patching"
+      }
+    ],
+    [
+      "L28.H25",
+      {
+        "total": 200,
+        "flips": 1,
+        "flip_rate": 0.005,
+        "mean_logit_change": -0.004375,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.07329041120774259,
+        "source": "probing"
+      }
+    ],
+    [
+      "L18.H16",
+      {
+        "total": 200,
+        "flips": 0,
+        "flip_rate": 0.0,
+        "mean_logit_change": 0.023125,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.0801146639199092,
+        "source": "patching"
+      }
+    ],
+    [
+      "L21.H15",
+      {
+        "total": 200,
+        "flips": 0,
+        "flip_rate": 0.0,
+        "mean_logit_change": -0.0025,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.09759610647971567,
+        "source": "patching"
+      }
+    ],
+    [
+      "L18.H6",
+      {
+        "total": 200,
+        "flips": 0,
+        "flip_rate": 0.0,
+        "mean_logit_change": 0.028125,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.08143008887997115,
+        "source": "patching"
+      }
+    ]
+  ],
+  "top_by_abs_logit_change": [
+    [
+      "L18.H6",
+      {
+        "total": 200,
+        "flips": 0,
+        "flip_rate": 0.0,
+        "mean_logit_change": 0.028125,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.08143008887997115,
+        "source": "patching"
+      }
+    ],
+    [
+      "L18.H16",
+      {
+        "total": 200,
+        "flips": 0,
+        "flip_rate": 0.0,
+        "mean_logit_change": 0.023125,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.0801146639199092,
+        "source": "patching"
+      }
+    ],
+    [
+      "L21.H19",
+      {
+        "total": 200,
+        "flips": 1,
+        "flip_rate": 0.005,
+        "mean_logit_change": -0.014375,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.12635360847637078,
+        "source": "patching"
+      }
+    ],
+    [
+      "L26.H26",
+      {
+        "total": 200,
+        "flips": 1,
+        "flip_rate": 0.005,
+        "mean_logit_change": 0.01375,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.1560198304703604,
+        "source": "patching"
+      }
+    ],
+    [
+      "L26.H25",
+      {
+        "total": 200,
+        "flips": 2,
+        "flip_rate": 0.01,
+        "mean_logit_change": 0.006875,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.15268303564902028,
+        "source": "patching"
+      }
+    ],
+    [
+      "L28.H11",
+      {
+        "total": 200,
+        "flips": 0,
+        "flip_rate": 0.0,
+        "mean_logit_change": 0.00625,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.07473912964438374,
+        "source": "probing"
+      }
+    ],
+    [
+      "L35.H23",
+      {
+        "total": 200,
+        "flips": 0,
+        "flip_rate": 0.0,
+        "mean_logit_change": -0.00625,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.07261843774138907,
+        "source": "probing"
+      }
+    ],
+    [
+      "L19.H31",
+      {
+        "total": 200,
+        "flips": 1,
+        "flip_rate": 0.005,
+        "mean_logit_change": -0.005625,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.09625608746983225,
+        "source": "patching"
+      }
+    ],
+    [
+      "L28.H25",
+      {
+        "total": 200,
+        "flips": 1,
+        "flip_rate": 0.005,
+        "mean_logit_change": -0.004375,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.07329041120774259,
+        "source": "probing"
+      }
+    ],
+    [
+      "L20.H8",
+      {
+        "total": 200,
+        "flips": 1,
+        "flip_rate": 0.005,
+        "mean_logit_change": 0.003125,
+        "median_logit_change": 0.0,
+        "std_logit_change": 0.18558922214126553,
+        "source": "patching"
+      }
+    ]
+  ]
+}
