@@ -22,9 +22,9 @@ image = (
         "accelerate",
         "numpy",
         "tqdm",
-        "scikit-learn",     # for later probing phase
-        "matplotlib",       # for later analysis phase
-        gpu="A100",         # compile torch for A100
+        "scikit-learn",  # for later probing phase
+        "matplotlib",  # for later analysis phase
+        gpu="A100",  # compile torch for A100
     )
     .add_local_dir(
         ".",
@@ -75,20 +75,20 @@ def run_evaluate() -> dict:
     Returns:
         Dictionary with evaluation summary statistics
     """
-    import sys
     import logging
     import subprocess
+    import sys
 
     # Set up logging
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
     logger = logging.getLogger(__name__)
 
-    logger.info("="*60)
+    logger.info("=" * 60)
     logger.info("Starting ComSense Circuits Behavioral Evaluation")
-    logger.info("="*60)
+    logger.info("=" * 60)
 
     # Run the main evaluation script
     logger.info("\n[MAIN] Running behavioral evaluation...")
@@ -97,6 +97,7 @@ def run_evaluate() -> dict:
     try:
         # Import and call main() from evaluate.py
         from evaluate import main
+
         results = main()
 
         # Commit results to volume
@@ -109,6 +110,7 @@ def run_evaluate() -> dict:
     except Exception as e:
         logger.error(f"\n[MAIN] ✗ Evaluation failed: {e}")
         import traceback
+
         traceback.print_exc()
         raise
 
@@ -122,25 +124,26 @@ def run_smoke_test() -> dict:
     Returns:
         Dictionary with smoke test results
     """
-    import sys
     import logging
+    import sys
+
     import torch
 
     # Add local modules to path
     sys.path.insert(0, "/root/comsense-circuits")
 
     from transformer_lens import HookedTransformer
-    from config import MODEL_NAME, MODEL_NAME_FALLBACKS, DTYPE
+
+    from config import DTYPE, MODEL_NAME, MODEL_NAME_FALLBACKS
 
     logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s'
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
     logger = logging.getLogger(__name__)
 
-    logger.info("="*60)
+    logger.info("=" * 60)
     logger.info("Running Smoke Test")
-    logger.info("="*60)
+    logger.info("=" * 60)
 
     results = {
         "cuda_available": False,
@@ -158,7 +161,9 @@ def run_smoke_test() -> dict:
 
     if results["cuda_available"]:
         logger.info(f"CUDA device: {torch.cuda.get_device_name(0)}")
-        logger.info(f"CUDA memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
+        logger.info(
+            f"CUDA memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB"
+        )
 
     # Try loading model
     model_names_to_try = [MODEL_NAME] + MODEL_NAME_FALLBACKS
@@ -202,7 +207,7 @@ def run_smoke_test() -> dict:
     # Verify tokens
     try:
         logger.info("\nVerifying True/False tokens...")
-        from config import TRUE_TOKEN_CANDIDATES, FALSE_TOKEN_CANDIDATES
+        from config import FALSE_TOKEN_CANDIDATES, TRUE_TOKEN_CANDIDATES
 
         true_token_id = None
         false_token_id = None
@@ -235,9 +240,12 @@ def run_smoke_test() -> dict:
     try:
         logger.info("\nVerifying hook-based activation extraction...")
         from evaluate import verify_hook_extraction
+
         hook_results = verify_hook_extraction(model)
         results.update(hook_results)
-        logger.info(f"✓ Hook extraction verified: {hook_results['n_layers']} layers, d_model={hook_results['d_model']}")
+        logger.info(
+            f"✓ Hook extraction verified: {hook_results['n_layers']} layers, d_model={hook_results['d_model']}"
+        )
     except Exception as e:
         logger.error(f"✗ Hook extraction failed: {e}")
 
@@ -245,11 +253,11 @@ def run_smoke_test() -> dict:
     del model
     torch.cuda.empty_cache()
 
-    logger.info("\n" + "="*60)
+    logger.info("\n" + "=" * 60)
     logger.info("Smoke Test Summary:")
     for key, value in results.items():
         logger.info(f"  {key}: {value}")
-    logger.info("="*60)
+    logger.info("=" * 60)
 
     return results
 
@@ -263,23 +271,24 @@ def run_extract_activations() -> dict:
     Returns:
         Dictionary with extraction summary statistics
     """
-    import sys
     import logging
+    import sys
 
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
     logger = logging.getLogger(__name__)
 
-    logger.info("="*60)
+    logger.info("=" * 60)
     logger.info("Starting Phase 2: Activation Extraction")
-    logger.info("="*60)
+    logger.info("=" * 60)
 
     sys.path.insert(0, "/root/comsense-circuits")
 
     try:
         from extract_activations import main
+
         results = main()
 
         logger.info("\n[MAIN] Committing results to volume...")
@@ -291,6 +300,7 @@ def run_extract_activations() -> dict:
     except Exception as e:
         logger.error(f"\n[MAIN] ✗ Extraction failed: {e}")
         import traceback
+
         traceback.print_exc()
         raise
 
@@ -306,8 +316,7 @@ def extract_activations():
     import logging
 
     logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s'
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
     logger = logging.getLogger(__name__)
 
@@ -321,9 +330,9 @@ def extract_activations():
 
     results = run_extract_activations.remote()
 
-    logger.info("\n" + "="*60)
+    logger.info("\n" + "=" * 60)
     logger.info("Extraction Complete!")
-    logger.info("="*60)
+    logger.info("=" * 60)
     logger.info(f"Model:      {results.get('model_name', 'N/A')}")
     logger.info(f"n_layers:   {results.get('n_layers', 'N/A')}")
     logger.info(f"d_model:    {results.get('d_model', 'N/A')}")
@@ -331,16 +340,19 @@ def extract_activations():
     logger.info(f"Examples:   {results.get('n_examples', 'N/A')}")
     logger.info(f"Output:     {results.get('output_mb', 'N/A'):.1f} MB")
     logger.info(f"\nResults saved to: /root/comsense-circuits/results/activations/")
-    logger.info("="*60)
+    logger.info("=" * 60)
 
 
 @app.function(**SHARED_KWARGS)
 def run_activation_patching() -> dict:
     """Run activation patching on Modal GPU."""
-    import sys
     import logging
+    import sys
 
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
     logger = logging.getLogger(__name__)
 
     logger.info("Starting Phase 3: Activation Patching")
@@ -348,6 +360,7 @@ def run_activation_patching() -> dict:
 
     try:
         from activation_patching import main
+
         results = main()
         results_vol.commit()
         logger.info("Activation patching completed successfully!")
@@ -355,6 +368,7 @@ def run_activation_patching() -> dict:
     except Exception as e:
         logger.error(f"Activation patching failed: {e}")
         import traceback
+
         traceback.print_exc()
         raise
 
@@ -362,10 +376,13 @@ def run_activation_patching() -> dict:
 @app.function(**SHARED_KWARGS)
 def run_extract_head_activations() -> dict:
     """Extract per-head activations on Modal GPU."""
-    import sys
     import logging
+    import sys
 
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
     logger = logging.getLogger(__name__)
 
     logger.info("Starting Phase 3b: Head-Level Activation Extraction")
@@ -373,6 +390,7 @@ def run_extract_head_activations() -> dict:
 
     try:
         from extract_head_activations import main
+
         results = main()
         results_vol.commit()
         logger.info("Head activation extraction completed successfully!")
@@ -380,6 +398,7 @@ def run_extract_head_activations() -> dict:
     except Exception as e:
         logger.error(f"Head activation extraction failed: {e}")
         import traceback
+
         traceback.print_exc()
         raise
 
@@ -387,10 +406,13 @@ def run_extract_head_activations() -> dict:
 @app.function(**SHARED_KWARGS)
 def run_head_patching() -> dict:
     """Run head-level patching on Modal GPU."""
-    import sys
     import logging
+    import sys
 
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
     logger = logging.getLogger(__name__)
 
     logger.info("Starting Phase 3c: Head-Level Patching")
@@ -398,6 +420,7 @@ def run_head_patching() -> dict:
 
     try:
         from head_patching import main
+
         results = main()
         results_vol.commit()
         logger.info("Head patching completed successfully!")
@@ -405,6 +428,7 @@ def run_head_patching() -> dict:
     except Exception as e:
         logger.error(f"Head patching failed: {e}")
         import traceback
+
         traceback.print_exc()
         raise
 
@@ -412,19 +436,23 @@ def run_head_patching() -> dict:
 @app.function(**SHARED_KWARGS)
 def run_l2_sweep() -> dict:
     """Run L2 regularization sweep. Uses GPU kwargs to access saved activations from volume."""
-    import sys
     import logging
+    import sys
 
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
     logger = logging.getLogger(__name__)
 
     sys.path.insert(0, "/root/comsense-circuits")
 
     try:
         import json
-        import torch
-        import numpy as np
         from pathlib import Path
+
+        import numpy as np
+        import torch
         from sklearn.decomposition import PCA
         from sklearn.linear_model import LogisticRegression
         from sklearn.model_selection import GroupKFold
@@ -439,6 +467,7 @@ def run_l2_sweep() -> dict:
             # Re-extract activations (we have GPU access)
             logger.info("activations.pt not found — re-extracting from model...")
             from extract_activations import main as extract_main
+
             extract_main()
             results_vol.commit()
 
@@ -490,7 +519,9 @@ def run_l2_sweep() -> dict:
                             X_tr = pca.fit_transform(X_tr)
                             X_te = pca.transform(X_te)
 
-                        clf = LogisticRegression(C=C, max_iter=2000, random_state=42, penalty="l2")
+                        clf = LogisticRegression(
+                            C=C, max_iter=2000, random_state=42, penalty="l2"
+                        )
                         clf.fit(X_tr, y_tr)
                         fold_scores.append(clf.score(X_te, y_te))
 
@@ -504,10 +535,14 @@ def run_l2_sweep() -> dict:
                 if best_acc > best_overall["acc"]:
                     best_overall = {"C": C, "layer": best_layer, "acc": best_acc}
 
-                logger.info(f"  C={C:<8} best layer={best_layer:2d}  acc={best_acc:.4f}")
+                logger.info(
+                    f"  C={C:<8} best layer={best_layer:2d}  acc={best_acc:.4f}"
+                )
 
             all_results[label] = {"by_C": c_results, "best": best_overall}
-            logger.info(f"  >>> Best: C={best_overall['C']} layer={best_overall['layer']} acc={best_overall['acc']:.4f}")
+            logger.info(
+                f"  >>> Best: C={best_overall['C']} layer={best_overall['layer']} acc={best_overall['acc']:.4f}"
+            )
 
         out_dir = results_dir / "analysis"
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -522,6 +557,7 @@ def run_l2_sweep() -> dict:
     except Exception as e:
         logger.error(f"L2 sweep failed: {e}")
         import traceback
+
         traceback.print_exc()
         raise
 
@@ -529,10 +565,13 @@ def run_l2_sweep() -> dict:
 @app.function(**CPU_KWARGS)
 def run_head_probing() -> dict:
     """Run head-level probing on saved head activations (CPU only)."""
-    import sys
     import logging
+    import sys
 
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
     logger = logging.getLogger(__name__)
 
     sys.path.insert(0, "/root/comsense-circuits/analysis")
@@ -540,15 +579,82 @@ def run_head_probing() -> dict:
 
     try:
         from pathlib import Path
+
         out_dir = Path("/root/comsense-circuits/results/analysis")
         out_dir.mkdir(parents=True, exist_ok=True)
         from analysis.probe_heads import main
+
         main(output_dir=out_dir)
         results_vol.commit()
         return {"status": "success"}
     except Exception as e:
         logger.error(f"Head probing failed: {e}")
         import traceback
+
+        traceback.print_exc()
+        raise
+
+
+@app.function(**SHARED_KWARGS)
+def run_logit_lens() -> dict:
+    """Run logit-lens extraction on Modal GPU."""
+    import logging
+    import sys
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+    logger = logging.getLogger(__name__)
+
+    logger.info("Starting logit-lens extraction")
+    sys.path.insert(0, "/root/comsense-circuits")
+
+    try:
+        from logit_lens import main
+
+        results = main()
+        results_vol.commit()
+        logger.info("Logit-lens extraction completed successfully!")
+        return results
+    except Exception as e:
+        logger.error(f"Logit-lens extraction failed: {e}")
+        import traceback
+
+        traceback.print_exc()
+        raise
+
+
+@app.function(**CPU_KWARGS)
+def run_plot_logit_lens() -> dict:
+    """Generate logit-lens plots and summary on Modal CPU."""
+    import logging
+    import sys
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    )
+    logger = logging.getLogger(__name__)
+
+    sys.path.insert(0, "/root/comsense-circuits/analysis")
+    sys.path.insert(0, "/root/comsense-circuits")
+
+    try:
+        from pathlib import Path
+
+        out_dir = Path("/root/comsense-circuits/results/analysis")
+        out_dir.mkdir(parents=True, exist_ok=True)
+        from analysis.plot_logit_lens import main
+
+        summary = main(output_dir=out_dir)
+        results_vol.commit()
+        logger.info("Logit-lens plotting completed successfully!")
+        return summary
+    except Exception as e:
+        logger.error(f"Logit-lens plotting failed: {e}")
+        import traceback
+
         traceback.print_exc()
         raise
 
@@ -557,7 +663,10 @@ def run_head_probing() -> dict:
 def l2_sweep():
     """Run just the L2 regularization sweep. Usage: modal run modal_app.py::l2_sweep"""
     import logging
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
     logger = logging.getLogger(__name__)
 
     logger.info("Launching L2 regularization sweep on Modal...")
@@ -566,8 +675,50 @@ def l2_sweep():
     for label, data in result.items():
         if isinstance(data, dict) and "best" in data:
             b = data["best"]
-            logger.info(f"  {label}: best C={b['C']} layer={b['layer']} acc={b['acc']:.4f}")
-    logger.info("\nDone! Download: uv run modal volume get comsense-results /analysis ./results_download/analysis")
+            logger.info(
+                f"  {label}: best C={b['C']} layer={b['layer']} acc={b['acc']:.4f}"
+            )
+    logger.info(
+        "\nDone! Download: uv run modal volume get comsense-results /analysis ./results_download/analysis"
+    )
+
+
+@app.local_entrypoint()
+def logit_lens():
+    """Run logit-lens extraction + plotting. Usage: modal run modal_app.py::logit_lens"""
+    import logging
+
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+    logger = logging.getLogger(__name__)
+
+    logger.info("Launching logit-lens analysis on Modal...")
+
+    logger.info("\n[1/2] Extracting layer-by-layer logit-lens traces on GPU...")
+    extraction = run_logit_lens.remote()
+    logger.info(
+        f"  Done! pairs={extraction.get('n_pairs_processed', 'N/A')} "
+        f"layers={extraction.get('n_layers', 'N/A')}"
+    )
+
+    logger.info("\n[2/2] Plotting and summarizing logit-lens results on CPU...")
+    summary = run_plot_logit_lens.remote()
+    traj = summary.get("trajectory_stats", {})
+    agg = summary.get("aggregate_metrics", {})
+    if traj.get("first_strong_divergence_layer") is not None:
+        logger.info(
+            f"  First strong divergence layer: {traj['first_strong_divergence_layer']}"
+        )
+    if agg.get("mean_incorrect_stable_wrong_layer") is not None:
+        logger.info(
+            f"  Mean stable wrong layer: {agg['mean_incorrect_stable_wrong_layer']:.2f}"
+        )
+
+    logger.info("\nLogit-lens analysis complete!")
+    logger.info(
+        "Download results: uv run modal volume get comsense-results /analysis ./results_download/analysis"
+    )
 
 
 @app.local_entrypoint()
@@ -577,7 +728,10 @@ def fix_run():
     Usage: modal run modal_app.py::fix_run
     """
     import logging
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
     logger = logging.getLogger(__name__)
 
     logger.info("Running fixed steps...")
@@ -593,13 +747,17 @@ def fix_run():
         for label, data in l2_result.items():
             if isinstance(data, dict) and "best" in data:
                 b = data["best"]
-                logger.info(f"    {label}: best C={b['C']} layer={b['layer']} acc={b['acc']:.4f}")
+                logger.info(
+                    f"    {label}: best C={b['C']} layer={b['layer']} acc={b['acc']:.4f}"
+                )
     except Exception as e:
         logger.error(f"  L2 sweep failed: {e}")
 
     try:
         head_result = head_handle.get()
-        logger.info(f"  Head extraction done! {head_result.get('n_examples', '?')} examples")
+        logger.info(
+            f"  Head extraction done! {head_result.get('n_examples', '?')} examples"
+        )
     except Exception as e:
         logger.error(f"  Head extraction failed: {e}")
         logger.info("  Skipping head probing.")
@@ -614,7 +772,9 @@ def fix_run():
         logger.error(f"  Head probing failed: {e}")
 
     logger.info("\nFix run complete!")
-    logger.info("Download all results: uv run modal volume get comsense-results / ./results")
+    logger.info(
+        "Download all results: uv run modal volume get comsense-results / ./results"
+    )
 
 
 @app.local_entrypoint()
@@ -632,7 +792,10 @@ def run_all():
       5. Head-level patching (GPU, uses patching results from step 2)
     """
     import logging
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
     logger = logging.getLogger(__name__)
 
     logger.info("=" * 60)
@@ -663,7 +826,9 @@ def run_all():
     logger.info("\n[3/5] Head-level activation extraction...")
     try:
         head_ext_results = run_extract_head_activations.remote()
-        logger.info(f"  Done! {head_ext_results.get('n_examples', '?')} examples, {head_ext_results.get('output_mb', 0):.1f} MB")
+        logger.info(
+            f"  Done! {head_ext_results.get('n_examples', '?')} examples, {head_ext_results.get('output_mb', 0):.1f} MB"
+        )
     except Exception as e:
         logger.error(f"  Failed: {e}")
 
@@ -682,13 +847,17 @@ def run_all():
         logger.info("  Done!")
         top = head_patch_results.get("top_20_heads", [])[:5]
         for h in top:
-            logger.info(f"    L{h['layer']}.H{h['head']}: effect={h['mean_effect']:+.4f}")
+            logger.info(
+                f"    L{h['layer']}.H{h['head']}: effect={h['mean_effect']:+.4f}"
+            )
     except Exception as e:
         logger.error(f"  Failed: {e}")
 
     logger.info("\n" + "=" * 60)
     logger.info("Pipeline Complete!")
-    logger.info("Download results: uv run modal volume get comsense-results / ./results")
+    logger.info(
+        "Download results: uv run modal volume get comsense-results / ./results"
+    )
     logger.info("=" * 60)
 
 
@@ -696,7 +865,10 @@ def run_all():
 def patch():
     """Run activation patching. Usage: modal run modal_app.py::patch"""
     import logging
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
     logger = logging.getLogger(__name__)
 
     logger.info("Launching activation patching on Modal...")
@@ -713,7 +885,10 @@ def patch():
 def extract_heads():
     """Extract head activations. Usage: modal run modal_app.py::extract_heads"""
     import logging
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
     logger = logging.getLogger(__name__)
 
     logger.info("Launching head activation extraction on Modal...")
@@ -728,7 +903,10 @@ def extract_heads():
 def patch_heads():
     """Run head-level patching. Usage: modal run modal_app.py::patch_heads"""
     import logging
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
     logger = logging.getLogger(__name__)
 
     logger.info("Launching head-level patching on Modal...")
@@ -737,7 +915,9 @@ def patch_heads():
     logger.info("\nHead Patching Complete!")
     top = results.get("top_20_heads", [])[:5]
     for h in top:
-        logger.info(f"  L{h['layer']}.H{h['head']}: effect={h['mean_effect']:+.4f} flip_rate={h['flip_rate']:.3f}")
+        logger.info(
+            f"  L{h['layer']}.H{h['head']}: effect={h['mean_effect']:+.4f} flip_rate={h['flip_rate']:.3f}"
+        )
 
 
 @app.local_entrypoint()
@@ -751,8 +931,7 @@ def launch_eval():
     import logging
 
     logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s'
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
     logger = logging.getLogger(__name__)
 
@@ -769,14 +948,14 @@ def launch_eval():
     # Call the remote function
     results = run_evaluate.remote()
 
-    logger.info("\n" + "="*60)
+    logger.info("\n" + "=" * 60)
     logger.info("Evaluation Complete!")
-    logger.info("="*60)
+    logger.info("=" * 60)
     logger.info(f"Overall accuracy: {results.get('overall_accuracy', 'N/A')}")
     logger.info(f"Total examples: {results.get('total_examples', 'N/A')}")
     logger.info(f"Asymmetric pairs: {results.get('asymmetric_pairs', 'N/A')}")
     logger.info(f"\nResults saved to: /root/comsense-circuits/results/eval/")
-    logger.info("="*60)
+    logger.info("=" * 60)
 
 
 @app.local_entrypoint()
@@ -790,8 +969,7 @@ def smoke_test():
     import logging
 
     logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s'
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
     logger = logging.getLogger(__name__)
 
@@ -806,7 +984,9 @@ def smoke_test():
     )
     if all_passed:
         logger.info("\n✓ Smoke test PASSED!")
-        logger.info(f"  n_layers={results.get('n_layers')}, d_model={results.get('d_model')}")
+        logger.info(
+            f"  n_layers={results.get('n_layers')}, d_model={results.get('d_model')}"
+        )
     else:
         logger.error("\n✗ Smoke test FAILED!")
         for key, value in results.items():
