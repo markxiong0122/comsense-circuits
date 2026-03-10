@@ -20,13 +20,15 @@ Are such failures architectural, representational, or training-induced?
 
 ## Phase 2: Representation Probing (Weeks 7–8)
 
-- Layers 0–19: no signal (chance). Layers 20+: signal rises, peaks at 30–34
-- **Divergence is late** → inference failure, not knowledge-retrieval failure
+- Layers 0–19: no strong linearly separable probe signal. Layers 20+: signal rises, peaks at 30–34
+- Initial interpretation: **divergence looked late** → inference failure, not knowledge-retrieval failure
 - After L2 regularization correction (TA feedback): genuine accuracy **~59%**
   - Original C=1.0 results (61%) were ~2% inflated by overfitting
   - PCA-50 acts as implicit regularization; optimal C=0.01
 - Correctness probe ≈ ground truth probe (~59%) → model doesn't "know" the answer
   and fail to use it; it genuinely lacks a strong commonsense representation
+- **Important update from logit lens:** incorrect examples often show an early wrong-answer
+  bias, but that bias typically becomes stable only around layer 20
 
 ## Phase 3: Mechanistic Intervention (Week 9)
 
@@ -65,12 +67,16 @@ Are such failures architectural, representational, or training-induced?
 ablation tests necessity (max 1% flips). Neither finds a critical component.
 Signal is weak (~59%) and redundantly spread across the network.
 
-**Knowledge-retrieval or inference failure?** Inference. Early layers carry no signal;
-divergence begins at layer 20 during reasoning computation, not input processing.
+**Knowledge-retrieval or inference failure?** Best current answer: **early bias plus late
+consolidation**. Probing suggested the cleanly separable signal emerged around layer 20,
+but logit lens showed that many incorrect examples are already tilted toward the wrong
+answer at the earliest measured layer. The final wrong answer usually becomes stable
+around layer 20, so the failure is not purely late-onset.
 
 **Architectural, representational, or training-induced?** Representational. The architecture
-can encode commonsense (59% > 50%), but the representation is too weak and diffuse.
-Cannot fully rule out training-induced (would require comparing different training data).
+can encode commonsense (59% > 50%), but the representation is too weak, diffuse, and
+unstable. Cannot fully rule out training-induced (would require comparing different
+training data).
 
 **Key contrast with prior work:** Factual recall tasks (Wang et al. 2022, Geva et al. 2023)
 show localized circuits where patching flips outputs. Commonsense reasoning does not —
@@ -80,19 +86,26 @@ it is fundamentally more distributed and less amenable to surgical intervention.
 
 ## Remaining Gaps
 
-- **Logit lens:** Project residual stream through unembedding at each layer (proposal Phase 2)
-  — teammate is running this separately
+- **Failure-direction logit lens:** Split failed-on-true vs failed-on-false to test whether
+  the early bias is specifically a false-bias
+- **Position-sensitive logit lens:** Compare statement-end vs final-token trajectories
+- These are relatively cheap follow-ups for a final polishing pass
 
 ## Key Files
 
 | File | What |
 |------|------|
 | `eval/` | Phase 1 behavioral results |
-| `analysis/probe_results.json` | Phase 2 probing (3 probes × 36 layers) |
-| `analysis/l2_sweep_results.json` | L2 regularization sweep (7 C values) |
-| `analysis/patching_results.json` | Layer-level patching (18 layers × 200 pairs) |
-| `analysis/head_patching_results.json` | Head-level patching (160 combos × 200 pairs) |
-| `analysis/head_probe_results.json` | Head-level probing (576 heads) |
-| `analysis/ablation_results.json` | Mean-ablation (17 heads × 200 pairs) |
-| `analysis/week9_findings.md` | Detailed Week 9 analysis with full tables |
-| `analysis/probing_findings.md` | Detailed Phase 2 analysis |
+| `analysis/` | Python analysis code only |
+| `artifacts/analysis/probe_results.json` | Phase 2 probing (3 probes × 36 layers) |
+| `artifacts/analysis/l2_sweep_results.json` | L2 regularization sweep (7 C values) |
+| `artifacts/analysis/patching_results.json` | Layer-level patching (18 layers × 200 pairs) |
+| `artifacts/analysis/head_patching_results.json` | Head-level patching (160 combos × 200 pairs) |
+| `artifacts/analysis/head_probe_results.json` | Head-level probing (576 heads) |
+| `artifacts/analysis/ablation_results.json` | Mean-ablation (17 heads × 200 pairs) |
+| `reports/summary.md` | This cross-phase project summary |
+| `reports/week9_findings.md` | Detailed Week 9 analysis with full tables |
+| `reports/probing_findings.md` | Detailed Phase 2 analysis |
+| `reports/logit_lens_findings.md` | Logit-lens findings and updated conclusion |
+| `reports/figures/` | Tracked presentation-quality figures |
+| `results_download/logit_lens/` | Downloaded local copies of raw logit-lens outputs |

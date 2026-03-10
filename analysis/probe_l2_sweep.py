@@ -12,12 +12,11 @@ from pathlib import Path
 
 import numpy as np
 import torch
+from probe import build_arrays, load_data
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GroupKFold
 from sklearn.preprocessing import StandardScaler
-
-from probe import build_arrays, load_data
 
 
 def probe_layer_with_C(
@@ -54,7 +53,8 @@ def probe_layer_with_C(
 
 def main():
     repo_dir = Path(__file__).parent.parent
-    analysis_dir = Path(__file__).parent
+    output_dir = repo_dir / "artifacts" / "analysis"
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     print("Loading activations...")
     acts, pairs = load_data(repo_dir)
@@ -74,9 +74,9 @@ def main():
     results = {}
 
     for label_type, n_pca, label in configs:
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"  {label}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         best_overall = {"C": None, "layer": None, "acc": 0.0}
         c_results = {}
@@ -101,10 +101,12 @@ def main():
             "by_C": c_results,
             "best": best_overall,
         }
-        print(f"  >>> Best: C={best_overall['C']} layer={best_overall['layer']} acc={best_overall['acc']:.4f}")
+        print(
+            f"  >>> Best: C={best_overall['C']} layer={best_overall['layer']} acc={best_overall['acc']:.4f}"
+        )
 
     # Save
-    out_path = analysis_dir / "l2_sweep_results.json"
+    out_path = output_dir / "l2_sweep_results.json"
     with open(out_path, "w") as f:
         json.dump(results, f, indent=2)
     print(f"\nSaved to {out_path}")
