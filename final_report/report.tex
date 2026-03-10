@@ -69,29 +69,6 @@ Our main finding is that commonsense failures are \emph{fundamentally distribute
 This distinguishes commonsense from factual recall and has implications for how alignment-relevant commonsense deficits can be diagnosed and repaired.
 
 %=============================================================================
-\section{Background and related work}
-\label{sec:background}
-%=============================================================================
-
-\paragraph{Mechanistic interpretability.}
-\citet{elhage2021mathematical} introduced the residual stream framework for analyzing transformer computations as a sum of contributions from attention heads and MLP layers.
-\citet{wang2022interpretability} demonstrated that indirect object identification in GPT-2 Small is mediated by a specific circuit of attention heads.
-\citet{geva2023dissecting} showed that factual recall in GPT models is localized to specific attention heads and MLP layers, with activation patching achieving 30--60\%+ flip rates.
-\citet{meng2022locating} further showed that factual associations can be edited by modifying specific MLP weight matrices.
-Our work tests whether commonsense reasoning exhibits comparable locality.
-
-\paragraph{Probing classifiers.}
-Probing trains linear classifiers on intermediate representations to measure whether a concept is linearly encoded~\citep{belinkov2022probing}.
-We use probing to measure whether commonsense truth and model correctness are decodable from the residual stream, finding only weak signal (${\sim}59$\%) that plateaus in late layers.
-
-\paragraph{Logit lens.}
-\citet{nostalgebraist2020logitlens} proposed projecting intermediate residual states through the final unembedding to recover layer-by-layer token predictions.
-We apply this to measure how commonsense judgments evolve across layers, finding a non-monotonic trajectory with early directional bias and late consolidation.
-
-\paragraph{Commonsense benchmarks.}
-Com2Sense~\citep{singh2021com2sense} provides 2,390 True/False statements organized in complementary pairs spanning physical, social, and temporal domains.
-Unlike HellaSwag~\citep{zellers2019hellaswag} or PIQA~\citep{bisk2020piqa}, Com2Sense is designed for \emph{contrastive} evaluation---asymmetric pair performance directly probes reasoning consistency.
-
 %=============================================================================
 \section{Methodology}
 \label{sec:methods}
@@ -101,7 +78,7 @@ Figure~\ref{fig:pipeline} provides an overview of our five-phase experimental pi
 
 \begin{figure*}[t]
 \centering
-\hspace*{-1.5cm}%
+\resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
     node distance=0.4cm and 0.25cm,
     phase/.style={rectangle, rounded corners=4pt, draw=#1, fill=#1!8, line width=1pt,
@@ -162,22 +139,16 @@ Figure~\ref{fig:pipeline} provides an overview of our five-phase experimental pi
       inner xsep=10pt, inner ysep=18pt, label={[font=\footnotesize, text=gray]above:Qwen3-8B (36L, 32H, $d$=4096) via TransformerLens on A100-80GB}] {};
 
 \end{tikzpicture}
+}
 \caption{Overview of the five-phase experimental pipeline. Each phase builds on the outputs of the previous: behavioral evaluation identifies asymmetric failure pairs, probing localizes signal to layers 20+, patching and ablation test sufficiency and necessity of individual components, logit lens reveals layer-by-layer prediction trajectories, and sublayer decomposition tests attention vs.\ MLP contributions.}
 \label{fig:pipeline}
 \end{figure*}
 
 \subsection{Model and dataset}
 
-We use Qwen3-8B (36 layers, 32 attention heads per layer, $d_\text{model}{=}4096$, $d_\text{head}{=}128$) loaded via TransformerLens in bfloat16 on an A100-80GB GPU provisioned through Modal~\citep{modal2023}.
-We disable Qwen3's chain-of-thought mode (\texttt{/no\_think}) to obtain clean residual streams without reasoning tokens.
-For evaluation, we format each statement as:
-
-\begin{center}
-\small\texttt{[statement]. Is this True or False? Answer:}
-\end{center}
-
-\noindent and compare the logits of the \texttt{True} and \texttt{False} tokens at the final position (no generation).
-Com2Sense is sourced from \texttt{tasksource/com2sense} on HuggingFace, with complementary pair assignments obtained from the official GitHub mapping at \texttt{PlusLabNLP/Com2Sense}.
+We use Qwen3-8B (36 layers, 32 heads, $d_\text{model}{=}4096$, $d_\text{head}{=}128$) in TransformerLens on an A100-80GB GPU.
+We disable chain-of-thought mode (\texttt{/no\_think}) and evaluate statements by comparing final-position logits for \texttt{True} and \texttt{False}.
+Com2Sense is loaded from \texttt{tasksource/com2sense}, with complementary pair assignments from the official GitHub mapping.
 
 \subsection{Asymmetric pair selection}
 
@@ -186,34 +157,17 @@ For mechanistic analysis, we select 200 pairs: 103 from the time domain, 50 temp
 
 \subsection{Representation probing}
 
-For each of the 200 pairs (400 examples), we run \texttt{run\_with\_cache()} and extract the residual stream at the final token position (\texttt{hook\_resid\_post}) across all 36 layers, yielding a $[36, 4096]$ tensor per example.
-We train logistic regression probes with \texttt{GroupKFold($n$=5)} keeping pairs together to prevent data leakage from near-duplicate complementary sentences.
-We probe for two labels: (1)~model correctness ($y{=}1$ if the model's prediction matches ground truth), and (2)~ground truth ($y{=}1$ if the statement is True).
-We also test PCA-50 dimensionality reduction and sweep $L_2$ regularization strength $C \in \{0.001, 0.01, 0.1, 0.5, 1.0, 5.0, 10.0\}$ to control for overfitting in the high-dimensional ($d{=}4096$), low-sample ($n{=}400$) regime.
+For each selected example we cache final-token \texttt{hook\_resid\_post} across all 36 layers and train logistic-regression probes with grouped 5-fold cross-validation, probing both correctness and ground truth.
+We test both raw features and PCA-50 and sweep $L_2$ regularization over $C \in \{0.001, 0.01, 0.1, 0.5, 1.0, 5.0, 10.0\}$.
 
 \subsection{Activation patching}
 
-For each of 200 pairs and 18 layers (layers 18--35, the region where probing detects signal), we:
-\begin{enumerate}
-    \item Cache the \emph{correct} example's \texttt{hook\_resid\_post} at the final token position.
-    \item Re-run the \emph{incorrect} example with a hook substituting the cached activation at layer $\ell$.
-    \item Record the logit change and whether the prediction flips.
-\end{enumerate}
-
-\noindent We also decompose by sublayer, patching \texttt{hook\_attn\_out} and \texttt{hook\_mlp\_out} separately, for 200 pairs $\times$ 18 layers $\times$ 2 sublayer types $= 7{,}200$ forward passes.
+For each of 200 pairs and 18 layers (18--35), we cache the correct example's final-token activation, patch it into the incorrect example, and record logit change and flips.
+We also patch \texttt{hook\_attn\_out} and \texttt{hook\_mlp\_out} separately.
 
 \subsection{Head-level analysis}
 
-\paragraph{Head patching.}
-We patch individual attention head $z$ vectors (\texttt{attn.hook\_z}) from correct to incorrect examples across the top 5 layers by patching effect (L18, L19, L20, L21, L26)---160 head-layer combinations per pair.
-
-\paragraph{Head probing.}
-We train logistic regression probes ($C{=}0.1$) on per-head $z$ vectors (128-dimensional) at the final token position for all 576 heads in layers 18--35 (18 layers $\times$ 32 heads).
-We also probe at the statement-end position to test whether earlier token positions carry stronger signal.
-
-\paragraph{Mean-ablation.}
-For the 17 most influential heads identified by patching and probing combined (10 from patching: L20.H8, L21.H19, L26.H26, L26.H25, L19.H31, L18.H16, L21.H15, L21.H16, L18.H6, L20.H9; 7 from probing: L32.H20, L34.H18, L28.H11, L24.H11, L28.H25, L32.H12, L35.H23), we compute the mean $z$ vector across all 400 examples for each head, then replace each target head's $z$ output with this mean on the 200 \emph{correct} examples.
-This tests \emph{necessity}: if a head is essential for correct predictions, removing its unique contribution (replacing with the population mean) should degrade performance.
+We complement layer patching with head patching on the top five layers by patching effect, head probing over all 576 heads in layers 18--35, and mean-ablation on 17 candidate heads identified from patching and probing.
 
 \subsection{Logit lens}
 
@@ -532,20 +486,6 @@ We cannot fully distinguish representational from training-induced with our meth
 If the model never encountered sufficient commonsense reasoning examples during training, the representational deficit would be a consequence of training data limitations.
 Distinguishing these would require comparing models trained on different data mixtures, which is beyond our scope.
 
-\subsection{Why patching fails for commonsense}
-
-The near-zero patching flip rates require explanation, since patching reliably works for factual recall.
-We identify two complementary reasons:
-
-\textbf{Distributional mismatch.}
-The correct and incorrect examples in each pair are \emph{different sentences} with different token sequences (e.g., ``Rocks make a good pillow'' vs.\ ``Rocks are too hard to sleep on'').
-Replacing one sentence's residual stream with another's creates activations inconsistent with the tokens downstream layers processed.
-This is fundamentally different from factual recall patching, where the same sentence is used with different corruptions.
-
-\textbf{Genuine distribution of signal.}
-Even the cleaner sublayer and head-level interventions (which create less distributional mismatch) produce negligible effects.
-The signal is genuinely too distributed and too weak to be captured by any single-component intervention.
-
 \subsection{Comparison with prior work}
 
 Table~\ref{tab:comparison} places our findings in the context of prior mechanistic studies.
@@ -570,22 +510,6 @@ The near-zero flip rates we observe are dramatically lower than those reported f
 \bottomrule
 \end{tabular}
 \end{table}
-
-\subsection{Implications}
-
-\paragraph{Surgical repair is ineffective.}
-Given that no single component is sufficient or necessary, targeted patching cannot repair commonsense failures in the way it can for factual recall.
-Approaches like ROME~\citep{meng2022locating}, which edit specific MLP weight matrices to correct factual errors, are unlikely to generalize to commonsense.
-Commonsense failures require addressing the underlying \emph{representational} weakness rather than a specific computational bottleneck.
-
-\paragraph{Two-stage failure model.}
-Our findings suggest a revised model of commonsense failure: an \emph{early-bias, late-consolidation} mechanism.
-Initial directional biases---possibly reflecting training data priors such as the observed false-bias (the model defaults to ``False'' for uncertain causal/temporal judgments)---are amplified and committed by late-layer computation.
-The non-monotonic logit-lens trajectories show the network iteratively revises its judgment rather than computing it at a single location, further supporting the distributed interpretation.
-
-\paragraph{Implications for alignment.}
-If commonsense failures are distributed and representationally diffuse, they cannot be fixed by localizing and editing specific circuits.
-This suggests that improving commonsense reliability likely requires changes to the \emph{training distribution}---specifically, more high-quality commonsense examples that build stronger representational encodings---rather than post-hoc surgical intervention.
 
 \subsection{Limitations}
 

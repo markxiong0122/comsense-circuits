@@ -1,0 +1,113 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{davis2023commonsense}
+\citation{wang2022interpretability,geva2023dissecting,meng2022locating}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}
+\citation{qwen3}
+\citation{singh2021com2sense}
+\citation{nanda2022transformerlens}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Overview of the five-phase experimental pipeline. Each phase builds on the outputs of the previous: behavioral evaluation identifies asymmetric failure pairs, probing localizes signal to layers 20+, patching and ablation test sufficiency and necessity of individual components, logit lens reveals layer-by-layer prediction trajectories, and sublayer decomposition tests attention vs.\ MLP contributions.}}{2}{figure.caption.1}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:pipeline}{{1}{2}{Overview of the five-phase experimental pipeline. Each phase builds on the outputs of the previous: behavioral evaluation identifies asymmetric failure pairs, probing localizes signal to layers 20+, patching and ablation test sufficiency and necessity of individual components, logit lens reveals layer-by-layer prediction trajectories, and sublayer decomposition tests attention vs.\ MLP contributions}{figure.caption.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Methodology}{2}{section.2}\protected@file@percent }
+\newlabel{sec:methods}{{2}{2}{Methodology}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Model and dataset}{2}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Asymmetric pair selection}{2}{subsection.2.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Accuracy by domain and scenario on Com2Sense (2,390 examples).}}{3}{table.caption.2}\protected@file@percent }
+\newlabel{tab:accuracy}{{1}{3}{Accuracy by domain and scenario on Com2Sense (2,390 examples)}{table.caption.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Representation probing}{3}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Activation patching}{3}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Head-level analysis}{3}{subsection.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.6}Logit lens}{3}{subsection.2.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Results}{3}{section.3}\protected@file@percent }
+\newlabel{sec:results}{{3}{3}{Results}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Phase 1: Behavioral evaluation}{3}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{False-bias.}{3}{section*.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces False-bias in asymmetric failures: percentage of failures where the model incorrectly rejects a True statement.}}{4}{table.caption.4}\protected@file@percent }
+\newlabel{tab:false_bias}{{2}{4}{False-bias in asymmetric failures: percentage of failures where the model incorrectly rejects a True statement}{table.caption.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Phase~2 probing results (original $C{=}1.0$ and $L_2$-corrected).}}{4}{table.caption.6}\protected@file@percent }
+\newlabel{tab:probing}{{3}{4}{Phase~2 probing results (original $C{=}1.0$ and $L_2$-corrected)}{table.caption.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Phase 2: Representation probing}{4}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Layer-wise probing.}{4}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{$L_2$ regularization correction.}{4}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Key finding.}{4}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Phase 3: Activation patching}{4}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Layer-level patching.}{4}{section*.10}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \textbf  {Left:} Per-layer probing accuracy for three probe configurations. Signal is at chance through layers 0--19 and rises from layer~20. \textbf  {Right:} $L_2$ regularization sweep. The corrected probing ceiling is ${\sim }59$\%.}}{5}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:probing}{{2}{5}{\textbf {Left:} Per-layer probing accuracy for three probe configurations. Signal is at chance through layers 0--19 and rises from layer~20. \textbf {Right:} $L_2$ regularization sweep. The corrected probing ceiling is ${\sim }59$\%}{figure.caption.9}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Layer-level activation patching results (layers 18--35). Flip rate is 0\% at all layers; logit change is uniformly negative and grows in magnitude with depth, reflecting distributional mismatch from full-stream replacement.}}{5}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:patching}{{3}{5}{Layer-level activation patching results (layers 18--35). Flip rate is 0\% at all layers; logit change is uniformly negative and grows in magnitude with depth, reflecting distributional mismatch from full-stream replacement}{figure.caption.11}{}}
+\@writefile{toc}{\contentsline {paragraph}{Head-level patching.}{5}{section*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Head-level probing.}{5}{section*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Position probing.}{5}{section*.15}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces \textbf  {Left:} Top attention heads by mean absolute patching effect. Maximum effect is 0.147 (L20.H8); no head produces prediction flips. \textbf  {Right:} Layer $\times $ head probing accuracy heatmap. Best individual head (59.5\%) matches full-stream accuracy, indicating the signal is redundantly distributed.}}{6}{figure.caption.14}\protected@file@percent }
+\newlabel{fig:head_analysis}{{4}{6}{\textbf {Left:} Top attention heads by mean absolute patching effect. Maximum effect is 0.147 (L20.H8); no head produces prediction flips. \textbf {Right:} Layer $\times $ head probing accuracy heatmap. Best individual head (59.5\%) matches full-stream accuracy, indicating the signal is redundantly distributed}{figure.caption.14}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Mean-ablation results for the 17 candidate heads (sorted by flip count). Source indicates whether the head was identified by patching or probing.}}{6}{table.caption.17}\protected@file@percent }
+\newlabel{tab:ablation}{{4}{6}{Mean-ablation results for the 17 candidate heads (sorted by flip count). Source indicates whether the head was identified by patching or probing}{table.caption.17}{}}
+\@writefile{toc}{\contentsline {paragraph}{Mean-ablation.}{6}{section*.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Phase 4: Logit-lens trajectory analysis}{6}{subsection.3.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Logit-lens failure timing statistics (200 incorrect examples).}}{7}{table.caption.19}\protected@file@percent }
+\newlabel{tab:logit_lens}{{5}{7}{Logit-lens failure timing statistics (200 incorrect examples)}{table.caption.19}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces \textbf  {Left:} Aggregate logit-lens trajectories. Signed logit gap (positive = supports ground truth) for correct (green) and incorrect (red) examples across 36 layers. Trajectories diverge at layer~0, partially converge through mid-layers, then re-diverge strongly from layer~20. \textbf  {Right:} Distribution of first-wrong (orange) and stable-wrong (blue) layers for the 200 incorrect examples.}}{7}{figure.caption.20}\protected@file@percent }
+\newlabel{fig:logit_lens}{{5}{7}{\textbf {Left:} Aggregate logit-lens trajectories. Signed logit gap (positive = supports ground truth) for correct (green) and incorrect (red) examples across 36 layers. Trajectories diverge at layer~0, partially converge through mid-layers, then re-diverge strongly from layer~20. \textbf {Right:} Distribution of first-wrong (orange) and stable-wrong (blue) layers for the 200 incorrect examples}{figure.caption.20}{}}
+\@writefile{toc}{\contentsline {paragraph}{Failure timing.}{7}{section*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Domain-level trajectories.}{7}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Phase 5: MLP vs.\ attention sublayer decomposition}{7}{subsection.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Neither sublayer dominates.}{7}{section*.22}\protected@file@percent }
+\citation{geva2023dissecting}
+\citation{wang2022interpretability}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Selected MLP vs.\ attention sublayer patching results (layers 18--35).}}{8}{table.caption.23}\protected@file@percent }
+\newlabel{tab:sublayer}{{6}{8}{Selected MLP vs.\ attention sublayer patching results (layers 18--35)}{table.caption.23}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Discussion}{8}{section.4}\protected@file@percent }
+\newlabel{sec:discussion}{{4}{8}{Discussion}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Answers to research questions}{8}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Q1: Localized or distributed?}{8}{section*.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Q2: Knowledge retrieval or inference failure?}{8}{section*.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Q3: Architectural, representational, or training-induced?}{8}{section*.26}\protected@file@percent }
+\citation{wang2022interpretability}
+\citation{geva2023dissecting}
+\citation{meng2022locating}
+\citation{conmy2023towards}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Comparison with prior mechanistic interpretability studies.}}{9}{table.caption.27}\protected@file@percent }
+\newlabel{tab:comparison}{{7}{9}{Comparison with prior mechanistic interpretability studies}{table.caption.27}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Comparison with prior work}{9}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Limitations}{9}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Conclusion}{9}{section.5}\protected@file@percent }
+\newlabel{sec:conclusion}{{5}{9}{Conclusion}{section.5}{}}
+\citation{nanda2022transformerlens}
+\citation{modal2023}
+\bibdata{paper}
+\bibcite{conmy2023towards}{{1}{2023}{{Conmy et~al.}}{{Conmy, Mavor-Parker, Lynch, Heimersheim, and Garriga-Alonso}}}
+\bibcite{davis2023commonsense}{{2}{2023}{{Davis \& Marcus}}{{Davis and Marcus}}}
+\bibcite{geva2023dissecting}{{3}{2023}{{Geva et~al.}}{{Geva, Bastings, Filippova, and Globerson}}}
+\bibcite{meng2022locating}{{4}{2022}{{Meng et~al.}}{{Meng, Bau, Andonian, and Belinkov}}}
+\bibcite{modal2023}{{5}{2023}{{Modal Labs}}{{}}}
+\bibcite{nanda2022transformerlens}{{6}{2022}{{Nanda \& Bloom}}{{Nanda and Bloom}}}
+\bibcite{qwen3}{{7}{2025}{{Qwen Team}}{{}}}
+\bibcite{singh2021com2sense}{{8}{2021}{{Singh et~al.}}{{Singh, Wen, Hou, Alipoormolabashi, Wu, Ma, and Peng}}}
+\bibcite{wang2022interpretability}{{9}{2023}{{Wang et~al.}}{{Wang, Variengien, Conmy, Shlegeris, and Steinhardt}}}
+\bibstyle{colm2026_conference}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Additional figures}{10}{appendix.A}\protected@file@percent }
+\newlabel{app:figures}{{A}{10}{Additional figures}{appendix.A}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {B}Full sublayer patching results}{10}{appendix.B}\protected@file@percent }
+\newlabel{app:sublayer}{{B}{10}{Full sublayer patching results}{appendix.B}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {C}Full ablation results}{10}{appendix.C}\protected@file@percent }
+\newlabel{app:ablation}{{C}{10}{Full ablation results}{appendix.C}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {D}MLP vs.\ attention sublayer visualization}{10}{appendix.D}\protected@file@percent }
+\newlabel{app:mlp_attn}{{D}{10}{MLP vs.\ attention sublayer visualization}{appendix.D}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Logit-lens trajectories broken down by domain for incorrect examples. Social failures show the most extreme final wrong-state ($-3.52$), while temporal failures show the weakest ($-2.30$).}}{11}{figure.caption.30}\protected@file@percent }
+\newlabel{fig:domain_trajectories}{{6}{11}{Logit-lens trajectories broken down by domain for incorrect examples. Social failures show the most extreme final wrong-state ($-3.52$), while temporal failures show the weakest ($-2.30$)}{figure.caption.30}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Heatmap of signed logit gaps for all 200 incorrect examples across 36 layers. Rows are individual examples, columns are layers. Most examples are red (wrong direction) from early layers; a minority start blue (correct direction) and transition to red around layer~20.}}{11}{figure.caption.31}\protected@file@percent }
+\newlabel{fig:heatmap}{{7}{11}{Heatmap of signed logit gaps for all 200 incorrect examples across 36 layers. Rows are individual examples, columns are layers. Most examples are red (wrong direction) from early layers; a minority start blue (correct direction) and transition to red around layer~20}{figure.caption.31}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Complete MLP vs.\ attention sublayer patching results for all 18 layers (18--35).}}{12}{table.caption.32}\protected@file@percent }
+\newlabel{tab:full_sublayer}{{8}{12}{Complete MLP vs.\ attention sublayer patching results for all 18 layers (18--35)}{table.caption.32}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Complete mean-ablation results for all 17 candidate heads, sorted by absolute mean logit change.}}{12}{table.caption.33}\protected@file@percent }
+\newlabel{tab:full_ablation}{{9}{12}{Complete mean-ablation results for all 17 candidate heads, sorted by absolute mean logit change}{table.caption.33}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces MLP vs.\ attention sublayer patching results across all 18 layers. Unlike full-stream patching (Figure~\ref {fig:patching}), sublayer effects have mixed signs, revealing that the monotonically negative \texttt  {resid\_post} results were an artifact of distributional mismatch rather than evidence of causal importance.}}{13}{figure.caption.34}\protected@file@percent }
+\newlabel{fig:mlp_attn}{{8}{13}{MLP vs.\ attention sublayer patching results across all 18 layers. Unlike full-stream patching (Figure~\ref {fig:patching}), sublayer effects have mixed signs, revealing that the monotonically negative \texttt {resid\_post} results were an artifact of distributional mismatch rather than evidence of causal importance}{figure.caption.34}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Mean-ablation flip rates for the 17 candidate attention heads. Maximum flip rate is 1.0\% (L26.H25, 2/200 correct predictions flipped). No head is necessary for correct commonsense predictions.}}{13}{figure.caption.35}\protected@file@percent }
+\newlabel{fig:ablation}{{9}{13}{Mean-ablation flip rates for the 17 candidate attention heads. Maximum flip rate is 1.0\% (L26.H25, 2/200 correct predictions flipped). No head is necessary for correct commonsense predictions}{figure.caption.35}{}}
+\gdef \@abspage@last{13}

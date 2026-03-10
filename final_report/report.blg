@@ -1,0 +1,50 @@
+This is BibTeX, Version 0.99d (TeX Live 2024)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: report.aux
+The style file: colm2026_conference.bst
+Database file #1: paper.bib
+Warning--entry type for "nanda2022transformerlens" isn't style-file defined
+--line 16 of file paper.bib
+Warning--empty booktitle in davis2023commonsense
+You've used 9 entries,
+            2773 wiz_defined-function locations,
+            634 strings with 6471 characters,
+and the built_in function-call counts, 4097 in all, are:
+= -- 314
+> -- 302
+< -- 6
++ -- 102
+- -- 93
+* -- 319
+:= -- 635
+add.period$ -- 26
+call.type$ -- 9
+change.case$ -- 58
+chr.to.int$ -- 9
+cite$ -- 19
+duplicate$ -- 187
+empty$ -- 340
+format.name$ -- 106
+if$ -- 851
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 6
+newline$ -- 52
+num.names$ -- 36
+pop$ -- 149
+preamble$ -- 1
+purify$ -- 49
+quote$ -- 0
+skip$ -- 149
+stack$ -- 0
+substring$ -- 18
+swap$ -- 16
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 99
+warning$ -- 1
+while$ -- 27
+width$ -- 0
+write$ -- 114
+(There were 2 warnings)
