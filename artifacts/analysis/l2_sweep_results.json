@@ -1,0 +1,113 @@
+{
+  "Correctness (no PCA)": {
+    "by_C": {
+      "0.001": {
+        "best_layer": 34,
+        "best_acc": 0.5750000000000001
+      },
+      "0.01": {
+        "best_layer": 33,
+        "best_acc": 0.5675000000000001
+      },
+      "0.1": {
+        "best_layer": 33,
+        "best_acc": 0.555
+      },
+      "0.5": {
+        "best_layer": 34,
+        "best_acc": 0.5475000000000001
+      },
+      "1.0": {
+        "best_layer": 34,
+        "best_acc": 0.545
+      },
+      "5.0": {
+        "best_layer": 34,
+        "best_acc": 0.5475000000000001
+      },
+      "10.0": {
+        "best_layer": 34,
+        "best_acc": 0.5525
+      }
+    },
+    "best": {
+      "C": 0.001,
+      "layer": 34,
+      "acc": 0.5750000000000001
+    }
+  },
+  "Correctness + PCA-50": {
+    "by_C": {
+      "0.001": {
+        "best_layer": 25,
+        "best_acc": 0.5825
+      },
+      "0.01": {
+        "best_layer": 23,
+        "best_acc": 0.5875
+      },
+      "0.1": {
+        "best_layer": 25,
+        "best_acc": 0.5875
+      },
+      "0.5": {
+        "best_layer": 25,
+        "best_acc": 0.5875
+      },
+      "1.0": {
+        "best_layer": 25,
+        "best_acc": 0.5875
+      },
+      "5.0": {
+        "best_layer": 25,
+        "best_acc": 0.5875
+      },
+      "10.0": {
+        "best_layer": 25,
+        "best_acc": 0.5875
+      }
+    },
+    "best": {
+      "C": 0.01,
+      "layer": 23,
+      "acc": 0.5875
+    }
+  },
+  "Ground truth + PCA-50": {
+    "by_C": {
+      "0.001": {
+        "best_layer": 32,
+        "best_acc": 0.5875
+      },
+      "0.01": {
+        "best_layer": 32,
+        "best_acc": 0.5925
+      },
+      "0.1": {
+        "best_layer": 32,
+        "best_acc": 0.5900000000000001
+      },
+      "0.5": {
+        "best_layer": 32,
+        "best_acc": 0.5875
+      },
+      "1.0": {
+        "best_layer": 32,
+        "best_acc": 0.5875
+      },
+      "5.0": {
+        "best_layer": 32,
+        "best_acc": 0.5875
+      },
+      "10.0": {
+        "best_layer": 32,
+        "best_acc": 0.5875
+      }
+    },
+    "best": {
+      "C": 0.01,
+      "layer": 32,
+      "acc": 0.5925
+    }
+  }
+}
