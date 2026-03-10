@@ -1,0 +1,47 @@
+{
+  "model_name": "Qwen/Qwen3-8B",
+  "n_layers": 36,
+  "n_pairs_processed": 200,
+  "trajectory_stats": {
+    "first_strong_divergence_layer": 0,
+    "mean_final_signed_gap_correct": 2.80875,
+    "mean_final_signed_gap_incorrect": -2.531875
+  },
+  "failure_stats": {
+    "first_wrong_bucket_counts": {
+      "layers_1_19": 47,
+      "layer_0": 153
+    },
+    "stable_wrong_bucket_counts": {
+      "layers_20_29": 46,
+      "layers_1_19": 152,
+      "layers_30_plus": 2
+    }
+  },
+  "domain_stats": {
+    "social": {
+      "n_examples": 47,
+      "mean_final_signed_gap": -3.521276595744681,
+      "mean_layer_20_signed_gap": -1.238031914893617
+    },
+    "temporal": {
+      "n_examples": 50,
+      "mean_final_signed_gap": -2.295,
+      "mean_layer_20_signed_gap": -0.77125
+    },
+    "time": {
+      "n_examples": 103,
+      "mean_final_signed_gap": -2.195388349514563,
+      "mean_layer_20_signed_gap": -0.6884101941747572
+    }
+  },
+  "heatmap_stats": {
+    "heatmap_examples": 200,
+    "heatmap_layers": 36
+  },
+  "aggregate_metrics": {
+    "mean_incorrect_first_wrong_layer": 1.61,
+    "mean_incorrect_stable_wrong_layer": 19.885,
+    "mean_correct_stable_correct_layer": 20.235
+  }
+}
