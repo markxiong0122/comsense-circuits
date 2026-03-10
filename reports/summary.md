@@ -52,11 +52,19 @@ Are such failures architectural, representational, or training-induced?
 - Final token: **60%** (L31) > statement-end: **57.25%** (L28)
 - Commonsense judgment keeps developing through the prompt suffix
 
+**Mean-ablation (17 target heads, Week 10):**
+- Tests NECESSITY: does removing a head break correct predictions?
+- Max flip rate: **1.0%** (L26.H25 — 2 flips out of 200)
+- Max |logit change|: **0.028** (L18.H6) — negligible
+- No head is necessary for correct predictions, confirming distributed encoding
+- Patching top heads and probing top heads both show near-zero ablation effects
+
 ---
 
 ## Answer to the Research Question
 
-**Localized or distributed?** Distributed. Zero flips from patching at any layer or head.
+**Localized or distributed?** Distributed. Patching tests sufficiency (0% flips),
+ablation tests necessity (max 1% flips). Neither finds a critical component.
 Signal is weak (~59%) and redundantly spread across the network.
 
 **Knowledge-retrieval or inference failure?** Best current answer: **early bias plus late
@@ -78,7 +86,6 @@ it is fundamentally more distributed and less amenable to surgical intervention.
 
 ## Remaining Gaps
 
-- **Ablation studies:** Mean-ablate top heads to test necessity (proposal Phase 3)
 - **Failure-direction logit lens:** Split failed-on-true vs failed-on-false to test whether
   the early bias is specifically a false-bias
 - **Position-sensitive logit lens:** Compare statement-end vs final-token trajectories
@@ -95,6 +102,7 @@ it is fundamentally more distributed and less amenable to surgical intervention.
 | `artifacts/analysis/patching_results.json` | Layer-level patching (18 layers × 200 pairs) |
 | `artifacts/analysis/head_patching_results.json` | Head-level patching (160 combos × 200 pairs) |
 | `artifacts/analysis/head_probe_results.json` | Head-level probing (576 heads) |
+| `artifacts/analysis/ablation_results.json` | Mean-ablation (17 heads × 200 pairs) |
 | `reports/summary.md` | This cross-phase project summary |
 | `reports/week9_findings.md` | Detailed Week 9 analysis with full tables |
 | `reports/probing_findings.md` | Detailed Phase 2 analysis |
