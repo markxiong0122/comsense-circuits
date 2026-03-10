@@ -10,8 +10,8 @@ Also probes at the statement-end token position (intermediate position probing)
 to test whether signal is stronger earlier in the sequence.
 
 Outputs:
-  head_probe_results.json — per-head accuracy at each layer, both positions
-  head_probe_heatmap.png  — heatmap of head accuracies
+  reports/figures/head_probe_heatmap.png     — tracked heatmap figure
+  artifacts/analysis/head_probe_results.json — raw per-head accuracy results
 """
 
 import json
@@ -143,60 +143,80 @@ def probe_cv(X, y, groups, C=0.1, n_splits=5, n_pca=None):
 
 def main(output_dir: Path | None = None):
     repo_dir = Path(__file__).parent.parent
-    analysis_dir = output_dir or Path(__file__).parent
+    base_dir = output_dir or repo_dir
+    artifacts_dir = base_dir / "artifacts" / "analysis"
+    figures_dir = base_dir / "reports" / "figures"
 
     print("Loading head activations...")
     acts, pairs, meta = load_head_data(repo_dir)
     extract_layers = meta["extract_layers"]
     n_heads = meta["n_heads"]
     d_head = meta["d_head"]
-    print(f"  {len(acts)} examples | layers {extract_layers[0]}-{extract_layers[-1]} | {n_heads} heads | d_head={d_head}")
+    print(
+        f"  {len(acts)} examples | layers {extract_layers[0]}-{extract_layers[-1]} | {n_heads} heads | d_head={d_head}"
+    )
 
     results = {}
 
     # 1. Head-level probing at final token position
-    for label_type, label_name in [("correctness", "correctness"), ("ground_truth", "ground_truth")]:
+    for label_type, label_name in [
+        ("correctness", "correctness"),
+        ("ground_truth", "ground_truth"),
+    ]:
         for position in ["final", "stmt_end"]:
             config_name = f"head_{label_name}_{position}"
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print(f"  {config_name}")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
 
             head_accs = np.zeros((len(extract_layers), n_heads))
 
             for li, layer in enumerate(extract_layers):
                 for hi in range(n_heads):
-                    X, y, groups = build_head_arrays(acts, pairs, li, hi, position, label_type)
+                    X, y, groups = build_head_arrays(
+                        acts, pairs, li, hi, position, label_type
+                    )
                     acc = probe_cv(X, y, groups, C=0.1)
                     head_accs[li, hi] = acc
 
                 best_head = int(np.argmax(head_accs[li]))
-                print(f"  Layer {layer:2d}: best head {best_head} ({head_accs[li, best_head]:.4f}), "
-                      f"mean {head_accs[li].mean():.4f}")
+                print(
+                    f"  Layer {layer:2d}: best head {best_head} ({head_accs[li, best_head]:.4f}), "
+                    f"mean {head_accs[li].mean():.4f}"
+                )
 
             results[config_name] = {
                 "head_accuracies": head_accs.tolist(),
                 "best_per_layer": [
-                    {"layer": extract_layers[li], "head": int(np.argmax(head_accs[li])),
-                     "acc": float(head_accs[li].max())}
+                    {
+                        "layer": extract_layers[li],
+                        "head": int(np.argmax(head_accs[li])),
+                        "acc": float(head_accs[li].max()),
+                    }
                     for li in range(len(extract_layers))
                 ],
                 "overall_best": {
-                    "layer": extract_layers[int(np.unravel_index(head_accs.argmax(), head_accs.shape)[0])],
-                    "head": int(np.unravel_index(head_accs.argmax(), head_accs.shape)[1]),
+                    "layer": extract_layers[
+                        int(np.unravel_index(head_accs.argmax(), head_accs.shape)[0])
+                    ],
+                    "head": int(
+                        np.unravel_index(head_accs.argmax(), head_accs.shape)[1]
+                    ),
                     "acc": float(head_accs.max()),
                 },
             }
 
             best = results[config_name]["overall_best"]
-            print(f"  >>> Best: layer {best['layer']} head {best['head']} acc={best['acc']:.4f}")
+            print(
+                f"  >>> Best: layer {best['layer']} head {best['head']} acc={best['acc']:.4f}"
+            )
 
     # 2. Intermediate position probing on residual stream (with PCA)
     for position in ["final", "stmt_end"]:
         config_name = f"resid_ground_truth_{position}"
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"  {config_name} (PCA-50)")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         layer_accs = []
         for li, layer in enumerate(extract_layers):
@@ -207,25 +227,36 @@ def main(output_dir: Path | None = None):
 
         best_li = int(np.argmax(layer_accs))
         results[config_name] = {
-            "layer_accuracies": {str(extract_layers[i]): layer_accs[i] for i in range(len(extract_layers))},
+            "layer_accuracies": {
+                str(extract_layers[i]): layer_accs[i]
+                for i in range(len(extract_layers))
+            },
             "best_layer": extract_layers[best_li],
             "best_acc": layer_accs[best_li],
         }
-        print(f"  >>> Best: layer {extract_layers[best_li]} acc={layer_accs[best_li]:.4f}")
+        print(
+            f"  >>> Best: layer {extract_layers[best_li]} acc={layer_accs[best_li]:.4f}"
+        )
 
     # Save results
-    analysis_dir.mkdir(parents=True, exist_ok=True)
-    out_path = analysis_dir / "head_probe_results.json"
+    artifacts_dir.mkdir(parents=True, exist_ok=True)
+    figures_dir.mkdir(parents=True, exist_ok=True)
+
+    out_path = artifacts_dir / "head_probe_results.json"
     with open(out_path, "w") as f:
         json.dump(results, f, indent=2)
-    print(f"\nSaved to {out_path}")
+    print(f"\nSaved raw results to {out_path}")
 
     # Plot heatmaps
     fig, axes = plt.subplots(2, 2, figsize=(16, 10))
-    for idx, config_name in enumerate([
-        "head_correctness_final", "head_ground_truth_final",
-        "head_correctness_stmt_end", "head_ground_truth_stmt_end",
-    ]):
+    for idx, config_name in enumerate(
+        [
+            "head_correctness_final",
+            "head_ground_truth_final",
+            "head_correctness_stmt_end",
+            "head_ground_truth_stmt_end",
+        ]
+    ):
         ax = axes[idx // 2][idx % 2]
         data = np.array(results[config_name]["head_accuracies"])
         im = ax.imshow(data, aspect="auto", cmap="RdYlGn", vmin=0.45, vmax=0.70)
@@ -238,7 +269,7 @@ def main(output_dir: Path | None = None):
 
     fig.suptitle("Head-Level Probe Accuracy — Qwen3-8B on Com2Sense", fontsize=14)
     fig.tight_layout()
-    plot_path = analysis_dir / "head_probe_heatmap.png"
+    plot_path = figures_dir / "head_probe_heatmap.png"
     fig.savefig(plot_path, dpi=150)
     plt.close(fig)
     print(f"Saved heatmap to {plot_path}")

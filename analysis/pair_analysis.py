@@ -8,8 +8,8 @@ Analyzes asymmetric pairs to:
 """
 
 import json
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 from typing import Any
 
 
@@ -29,8 +29,13 @@ def load_jsonl(path: Path) -> list[dict]:
 
 def main():
     # Paths
-    eval_dir = Path(__file__).parent.parent / "eval"
-    analysis_dir = Path(__file__).parent
+    repo_dir = Path(__file__).parent.parent
+    eval_dir = repo_dir / "eval"
+    reports_dir = repo_dir / "reports"
+    artifacts_dir = repo_dir / "artifacts" / "analysis"
+
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    artifacts_dir.mkdir(parents=True, exist_ok=True)
 
     # Load data
     print("Loading data...")
@@ -55,7 +60,9 @@ def main():
         incorrect_id = pair["incorrect_example_id"]
 
         # Get the label of the incorrect example (what the model got wrong)
-        incorrect_label = pair["label_a"] if incorrect_id == pair["example_a_id"] else pair["label_b"]
+        incorrect_label = (
+            pair["label_a"] if incorrect_id == pair["example_a_id"] else pair["label_b"]
+        )
 
         if incorrect_label:  # Model got the TRUE statement wrong
             failed_on_true += 1
@@ -64,14 +71,20 @@ def main():
 
     total_asymmetric = len(asymmetric_pairs)
     print(f"\nFailure Direction Summary:")
-    print(f"  Failed on TRUE:  {failed_on_true:4d} ({100*failed_on_true/total_asymmetric:.1f}%)")
-    print(f"  Failed on FALSE: {failed_on_false:4d} ({100*failed_on_false/total_asymmetric:.1f}%)")
+    print(
+        f"  Failed on TRUE:  {failed_on_true:4d} ({100 * failed_on_true / total_asymmetric:.1f}%)"
+    )
+    print(
+        f"  Failed on FALSE: {failed_on_false:4d} ({100 * failed_on_false / total_asymmetric:.1f}%)"
+    )
 
     # Step 3: Correlate with domain
     print("\n=== Step 3: Failure Direction by Domain ===")
 
     # Track failures by domain
-    domain_stats = defaultdict(lambda: {"failed_on_true": 0, "failed_on_false": 0, "total": 0})
+    domain_stats = defaultdict(
+        lambda: {"failed_on_true": 0, "failed_on_false": 0, "total": 0}
+    )
 
     for pair in asymmetric_pairs:
         incorrect_id = pair["incorrect_example_id"]
@@ -85,7 +98,9 @@ def main():
         domain = pred["domain"]
 
         # Get the label of the incorrect example
-        incorrect_label = pair["label_a"] if incorrect_id == pair["example_a_id"] else pair["label_b"]
+        incorrect_label = (
+            pair["label_a"] if incorrect_id == pair["example_a_id"] else pair["label_b"]
+        )
 
         domain_stats[domain]["total"] += 1
         if incorrect_label:  # Failed on TRUE
@@ -101,13 +116,19 @@ def main():
             pct_true = 100 * stats["failed_on_true"] / total
             pct_false = 100 * stats["failed_on_false"] / total
             print(f"  {domain}:")
-            print(f"    failed_on_true:  {stats['failed_on_true']:3d} ({pct_true:.1f}%)")
-            print(f"    failed_on_false: {stats['failed_on_false']:3d} ({pct_false:.1f}%)")
+            print(
+                f"    failed_on_true:  {stats['failed_on_true']:3d} ({pct_true:.1f}%)"
+            )
+            print(
+                f"    failed_on_false: {stats['failed_on_false']:3d} ({pct_false:.1f}%)"
+            )
 
     # Also track by domain_scenario combination
     print("\n=== Failure Direction by Domain+Scenario ===")
 
-    domain_scenario_stats = defaultdict(lambda: {"failed_on_true": 0, "failed_on_false": 0, "total": 0})
+    domain_scenario_stats = defaultdict(
+        lambda: {"failed_on_true": 0, "failed_on_false": 0, "total": 0}
+    )
 
     for pair in asymmetric_pairs:
         incorrect_id = pair["incorrect_example_id"]
@@ -120,7 +141,9 @@ def main():
         scenario = pred["scenario"]
         key = f"{domain}_{scenario}"
 
-        incorrect_label = pair["label_a"] if incorrect_id == pair["example_a_id"] else pair["label_b"]
+        incorrect_label = (
+            pair["label_a"] if incorrect_id == pair["example_a_id"] else pair["label_b"]
+        )
 
         domain_scenario_stats[key]["total"] += 1
         if incorrect_label:
@@ -130,15 +153,23 @@ def main():
 
     # Sort by total (descending) and show
     print("\nBy Domain_Scenario (sorted by count):")
-    for key in sorted(domain_scenario_stats.keys(), key=lambda k: domain_scenario_stats[k]["total"], reverse=True):
+    for key in sorted(
+        domain_scenario_stats.keys(),
+        key=lambda k: domain_scenario_stats[k]["total"],
+        reverse=True,
+    ):
         stats = domain_scenario_stats[key]
         total = stats["total"]
         if total > 0:
             pct_true = 100 * stats["failed_on_true"] / total
             pct_false = 100 * stats["failed_on_false"] / total
             print(f"  {key}:")
-            print(f"    failed_on_true:  {stats['failed_on_true']:3d} ({pct_true:.1f}%)")
-            print(f"    failed_on_false: {stats['failed_on_false']:3d} ({pct_false:.1f}%)")
+            print(
+                f"    failed_on_true:  {stats['failed_on_true']:3d} ({pct_true:.1f}%)"
+            )
+            print(
+                f"    failed_on_false: {stats['failed_on_false']:3d} ({pct_false:.1f}%)"
+            )
 
     # Step 4: Select ~200 high-confidence failures
     print("\n=== Step 4: Selecting High-Confidence Failures ===")
@@ -156,7 +187,9 @@ def main():
         correct_pred = predictions[correct_id]
 
         # Get the label of the incorrect example
-        incorrect_label = pair["label_a"] if incorrect_id == pair["example_a_id"] else pair["label_b"]
+        incorrect_label = (
+            pair["label_a"] if incorrect_id == pair["example_a_id"] else pair["label_b"]
+        )
 
         # Calculate logit gap (confidence signal strength)
         logit_gap = abs(incorrect_pred["true_logit"] - incorrect_pred["false_logit"])
@@ -185,17 +218,21 @@ def main():
 
     # First pass: high confidence failures from low-accuracy domains
     high_conf_from_low_acc = [
-        p for p in enriched_pairs
+        p
+        for p in enriched_pairs
         if p["domain"] in LOW_ACCURACY_DOMAINS
         and p["incorrect_confidence"] >= MIN_CONFIDENCE
         and p["logit_gap"] >= MIN_LOGIT_GAP
     ]
 
-    print(f"High-confidence failures from temporal/time domains: {len(high_conf_from_low_acc)}")
+    print(
+        f"High-confidence failures from temporal/time domains: {len(high_conf_from_low_acc)}"
+    )
 
     # Second pass: if we need more, add from social domain with high confidence
     social_high_conf = [
-        p for p in enriched_pairs
+        p
+        for p in enriched_pairs
         if p["domain"] == "social"
         and p["incorrect_confidence"] >= MIN_CONFIDENCE
         and p["logit_gap"] >= MIN_LOGIT_GAP
@@ -205,7 +242,8 @@ def main():
 
     # Third pass: physical domain high confidence
     physical_high_conf = [
-        p for p in enriched_pairs
+        p
+        for p in enriched_pairs
         if p["domain"] == "physical"
         and p["incorrect_confidence"] >= MIN_CONFIDENCE
         and p["logit_gap"] >= MIN_LOGIT_GAP
@@ -218,13 +256,17 @@ def main():
 
     # Add social if needed to reach ~200
     if len(selected) < 200:
-        social_sorted = sorted(social_high_conf, key=lambda p: -p["incorrect_confidence"])
-        selected.extend(social_sorted[:200 - len(selected)])
+        social_sorted = sorted(
+            social_high_conf, key=lambda p: -p["incorrect_confidence"]
+        )
+        selected.extend(social_sorted[: 200 - len(selected)])
 
     # Add physical if still needed
     if len(selected) < 200:
-        physical_sorted = sorted(physical_high_conf, key=lambda p: -p["incorrect_confidence"])
-        selected.extend(physical_sorted[:200 - len(selected)])
+        physical_sorted = sorted(
+            physical_high_conf, key=lambda p: -p["incorrect_confidence"]
+        )
+        selected.extend(physical_sorted[: 200 - len(selected)])
 
     # Sort final selection by confidence (descending)
     selected = sorted(selected, key=lambda p: -p["incorrect_confidence"])
@@ -250,8 +292,12 @@ def main():
     print(f"  By failure direction:")
     print(f"    failed_on_true:  {selected_failed_on_true}")
     print(f"    failed_on_false: {selected_failed_on_false}")
-    print(f"  Avg confidence on wrong answer: {sum(p['incorrect_confidence'] for p in selected)/len(selected):.3f}")
-    print(f"  Avg logit gap: {sum(p['logit_gap'] for p in selected)/len(selected):.3f}")
+    print(
+        f"  Avg confidence on wrong answer: {sum(p['incorrect_confidence'] for p in selected) / len(selected):.3f}"
+    )
+    print(
+        f"  Avg logit gap: {sum(p['logit_gap'] for p in selected) / len(selected):.3f}"
+    )
 
     # Write outputs
     print("\n=== Writing Output Files ===")
@@ -264,8 +310,8 @@ def main():
         "",
         f"| Direction | Count | Percentage |",
         f"|-----------|-------|------------|",
-        f"| Failed on TRUE  | {failed_on_true} | {100*failed_on_true/total_asymmetric:.1f}% |",
-        f"| Failed on FALSE | {failed_on_false} | {100*failed_on_false/total_asymmetric:.1f}% |",
+        f"| Failed on TRUE  | {failed_on_true} | {100 * failed_on_true / total_asymmetric:.1f}% |",
+        f"| Failed on FALSE | {failed_on_false} | {100 * failed_on_false / total_asymmetric:.1f}% |",
         f"| **Total** | {total_asymmetric} | 100% |",
         "",
         "## Failure Direction by Domain",
@@ -283,15 +329,21 @@ def main():
                 f"| {domain} | {stats['failed_on_true']} | {stats['failed_on_false']} | {total} | {pct_true:.1f}% |"
             )
 
-    md_lines.extend([
-        "",
-        "## Failure Direction by Domain+Scenario",
-        "",
-        f"| Domain_Scenario | Failed on TRUE | Failed on FALSE | Total | % TRUE |",
-        f"|-----------------|----------------|-----------------|-------|--------|",
-    ])
+    md_lines.extend(
+        [
+            "",
+            "## Failure Direction by Domain+Scenario",
+            "",
+            f"| Domain_Scenario | Failed on TRUE | Failed on FALSE | Total | % TRUE |",
+            f"|-----------------|----------------|-----------------|-------|--------|",
+        ]
+    )
 
-    for key in sorted(domain_scenario_stats.keys(), key=lambda k: domain_scenario_stats[k]["total"], reverse=True):
+    for key in sorted(
+        domain_scenario_stats.keys(),
+        key=lambda k: domain_scenario_stats[k]["total"],
+        reverse=True,
+    ):
         stats = domain_scenario_stats[key]
         total = stats["total"]
         if total > 0:
@@ -300,30 +352,34 @@ def main():
                 f"| {key} | {stats['failed_on_true']} | {stats['failed_on_false']} | {total} | {pct_true:.1f}% |"
             )
 
-    md_lines.extend([
-        "",
-        "## Selected Pairs for Phase 2",
-        "",
-        f"- **Total selected:** {len(selected)}",
-        f"- **Avg confidence on wrong answer:** {sum(p['incorrect_confidence'] for p in selected)/len(selected):.3f}",
-        f"- **Avg logit gap:** {sum(p['logit_gap'] for p in selected)/len(selected):.3f}",
-        "",
-        "### By Domain:",
-        "",
-    ])
+    md_lines.extend(
+        [
+            "",
+            "## Selected Pairs for Phase 2",
+            "",
+            f"- **Total selected:** {len(selected)}",
+            f"- **Avg confidence on wrong answer:** {sum(p['incorrect_confidence'] for p in selected) / len(selected):.3f}",
+            f"- **Avg logit gap:** {sum(p['logit_gap'] for p in selected) / len(selected):.3f}",
+            "",
+            "### By Domain:",
+            "",
+        ]
+    )
 
     for domain, count in sorted(selected_domains.items(), key=lambda x: -x[1]):
         md_lines.append(f"- {domain}: {count}")
 
-    md_lines.extend([
-        "",
-        "### By Failure Direction:",
-        "",
-        f"- Failed on TRUE: {selected_failed_on_true}",
-        f"- Failed on FALSE: {selected_failed_on_false}",
-    ])
+    md_lines.extend(
+        [
+            "",
+            "### By Failure Direction:",
+            "",
+            f"- Failed on TRUE: {selected_failed_on_true}",
+            f"- Failed on FALSE: {selected_failed_on_false}",
+        ]
+    )
 
-    summary_path = analysis_dir / "failure_direction_summary.md"
+    summary_path = reports_dir / "failure_direction_summary.md"
     with open(summary_path, "w") as f:
         f.write("\n".join(md_lines))
     print(f"Wrote {summary_path}")
@@ -339,7 +395,7 @@ def main():
         "by_domain_scenario": dict(domain_scenario_stats),
     }
 
-    breakdown_path = analysis_dir / "failure_direction_by_domain.json"
+    breakdown_path = artifacts_dir / "failure_direction_by_domain.json"
     with open(breakdown_path, "w") as f:
         json.dump(breakdown, f, indent=2)
     print(f"Wrote {breakdown_path}")
@@ -350,10 +406,18 @@ def main():
             "pair_id": p["pair_id"],
             "correct_example_id": p["correct_example_id"],
             "incorrect_example_id": p["incorrect_example_id"],
-            "sentence_correct": p["sentence_b"] if p["example_b_id"] == p["correct_example_id"] else p["sentence_a"],
-            "sentence_incorrect": p["sentence_a"] if p["example_a_id"] == p["incorrect_example_id"] else p["sentence_b"],
-            "label_correct": p["label_b"] if p["example_b_id"] == p["correct_example_id"] else p["label_a"],
-            "label_incorrect": p["label_a"] if p["example_a_id"] == p["incorrect_example_id"] else p["label_b"],
+            "sentence_correct": p["sentence_b"]
+            if p["example_b_id"] == p["correct_example_id"]
+            else p["sentence_a"],
+            "sentence_incorrect": p["sentence_a"]
+            if p["example_a_id"] == p["incorrect_example_id"]
+            else p["sentence_b"],
+            "label_correct": p["label_b"]
+            if p["example_b_id"] == p["correct_example_id"]
+            else p["label_a"],
+            "label_incorrect": p["label_a"]
+            if p["example_a_id"] == p["incorrect_example_id"]
+            else p["label_b"],
             "domain": p["domain"],
             "scenario": p["scenario"],
             "incorrect_confidence": p["incorrect_confidence"],

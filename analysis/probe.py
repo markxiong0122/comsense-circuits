@@ -10,9 +10,9 @@ Cross-validation is grouped by pair so that both members of a complementary
 pair always land in the same fold — preventing data leakage from near-duplicate
 sentences appearing in both train and test.
 
-Outputs (written to analysis/):
-  probe_results.json       — all per-layer accuracies + per-domain breakdown
-  probe_accuracy_curve.png — all three probes plotted together
+Outputs:
+  artifacts/analysis/probe_results.json    — all per-layer accuracies + per-domain breakdown
+  reports/figures/probe_accuracy_curve.png — all three probes plotted together
 """
 
 import json
@@ -180,18 +180,24 @@ def run_probe(
 
 def main():
     repo_dir = Path(__file__).parent.parent
-    analysis_dir = Path(__file__).parent
+    artifacts_dir = repo_dir / "artifacts" / "analysis"
+    figures_dir = repo_dir / "reports" / "figures"
+
+    artifacts_dir.mkdir(parents=True, exist_ok=True)
+    figures_dir.mkdir(parents=True, exist_ok=True)
 
     print("Loading activations and pair metadata...")
     acts, pairs = load_data(repo_dir)
     first_tensor = next(iter(acts.values()))
     n_layers, d_model = first_tensor.shape
-    print(f"  {len(acts)} examples | {n_layers} layers | d_model={d_model} | {len(pairs)} pairs")
+    print(
+        f"  {len(acts)} examples | {n_layers} layers | d_model={d_model} | {len(pairs)} pairs"
+    )
 
     probes = [
-        ("correctness",  None, "Correctness (no PCA)"),
-        ("correctness",  50,   "Correctness + PCA-50"),
-        ("ground_truth", 50,   "Ground truth + PCA-50"),
+        ("correctness", None, "Correctness (no PCA)"),
+        ("correctness", 50, "Correctness + PCA-50"),
+        ("ground_truth", 50, "Ground truth + PCA-50"),
     ]
 
     all_results = {}
@@ -217,13 +223,13 @@ def main():
         "best_layer_ground_truth_pca": best_layer,
         "best_accuracy_ground_truth_pca": gt_accs[best_layer],
         "per_layer": {
-            label: accs for label, accs in
-            zip([p[2] for p in probes], all_results.values())
+            label: accs
+            for label, accs in zip([p[2] for p in probes], all_results.values())
         },
         "domain_accuracies_at_best_layer": domain_accs,
     }
 
-    results_path = analysis_dir / "probe_results.json"
+    results_path = artifacts_dir / "probe_results.json"
     with open(results_path, "w") as f:
         json.dump(results, f, indent=2)
     print(f"\nSaved results to {results_path}")
@@ -236,17 +242,32 @@ def main():
     fig, ax = plt.subplots(figsize=(11, 5))
     for (_, _, label), color, style in zip(probes, colors, styles):
         accs = all_results[label]
-        ax.plot(layers, accs, marker="o", markersize=3.5, linewidth=1.5,
-                color=color, linestyle=style, label=label)
+        ax.plot(
+            layers,
+            accs,
+            marker="o",
+            markersize=3.5,
+            linewidth=1.5,
+            color=color,
+            linestyle=style,
+            label=label,
+        )
 
     ax.axhline(0.5, color="gray", linestyle=":", linewidth=1, label="Chance (50%)")
-    ax.axvline(best_layer, color="#dc2626", linestyle=":", linewidth=1.2,
-               label=f"Best layer {best_layer} ({gt_accs[best_layer]:.2%})")
+    ax.axvline(
+        best_layer,
+        color="#dc2626",
+        linestyle=":",
+        linewidth=1.2,
+        label=f"Best layer {best_layer} ({gt_accs[best_layer]:.2%})",
+    )
 
     ax.set_xlabel("Layer")
     ax.set_ylabel("Cross-validated accuracy")
-    ax.set_title("Linear Probe Accuracy on Residual Stream — Qwen3-8B on Com2Sense\n"
-                 "Correct vs. Incorrect | Ground Truth — Final Token Position")
+    ax.set_title(
+        "Linear Probe Accuracy on Residual Stream — Qwen3-8B on Com2Sense\n"
+        "Correct vs. Incorrect | Ground Truth — Final Token Position"
+    )
     ax.set_xticks(range(0, n_layers, 2))
     ax.set_xlim(-0.5, n_layers - 0.5)
     ax.set_ylim(0.4, 1.05)
@@ -254,7 +275,7 @@ def main():
     ax.grid(axis="y", alpha=0.3)
     fig.tight_layout()
 
-    plot_path = analysis_dir / "probe_accuracy_curve.png"
+    plot_path = figures_dir / "probe_accuracy_curve.png"
     fig.savefig(plot_path, dpi=150)
     print(f"Saved plot to {plot_path}")
     plt.close(fig)
