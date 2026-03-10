@@ -64,5 +64,7 @@ models/
 checkpoints/
 
 # Downloaded results (large .pt files, kept in Modal volume)
-results_download/
+results_download/*
+!results_download/logit_lens/
+!results_download/logit_lens/**
 activations_dir/
