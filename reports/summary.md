@@ -89,10 +89,15 @@ it is fundamentally more distributed and less amenable to surgical intervention.
 | File | What |
 |------|------|
 | `eval/` | Phase 1 behavioral results |
-| `analysis/probe_results.json` | Phase 2 probing (3 probes × 36 layers) |
-| `analysis/l2_sweep_results.json` | L2 regularization sweep (7 C values) |
-| `analysis/patching_results.json` | Layer-level patching (18 layers × 200 pairs) |
-| `analysis/head_patching_results.json` | Head-level patching (160 combos × 200 pairs) |
-| `analysis/head_probe_results.json` | Head-level probing (576 heads) |
-| `analysis/week9_findings.md` | Detailed Week 9 analysis with full tables |
-| `analysis/probing_findings.md` | Detailed Phase 2 analysis |
+| `analysis/` | Python analysis code only |
+| `artifacts/analysis/probe_results.json` | Phase 2 probing (3 probes × 36 layers) |
+| `artifacts/analysis/l2_sweep_results.json` | L2 regularization sweep (7 C values) |
+| `artifacts/analysis/patching_results.json` | Layer-level patching (18 layers × 200 pairs) |
+| `artifacts/analysis/head_patching_results.json` | Head-level patching (160 combos × 200 pairs) |
+| `artifacts/analysis/head_probe_results.json` | Head-level probing (576 heads) |
+| `reports/summary.md` | This cross-phase project summary |
+| `reports/week9_findings.md` | Detailed Week 9 analysis with full tables |
+| `reports/probing_findings.md` | Detailed Phase 2 analysis |
+| `reports/logit_lens_findings.md` | Logit-lens findings and updated conclusion |
+| `reports/figures/` | Tracked presentation-quality figures |
+| `results_download/logit_lens/` | Downloaded local copies of raw logit-lens outputs |
