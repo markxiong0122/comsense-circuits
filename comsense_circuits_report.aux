@@ -1,0 +1,41 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Setup and Data Sources}{1}{section.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Behavioral accuracy by domain from \texttt  {eval/accuracy\_table.json}.}}{2}{table.1}\protected@file@percent }
+\newlabel{tab:behavioral-domain}{{1}{2}{Behavioral accuracy by domain from \texttt {eval/accuracy\_table.json}}{table.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Behavioral Findings}{2}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Representation Probing}{2}{section.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Original phase-2 probe results from \texttt  {artifacts/analysis/probe\_results.json}.}}{3}{table.2}\protected@file@percent }
+\newlabel{tab:probe-main}{{2}{3}{Original phase-2 probe results from \texttt {artifacts/analysis/probe\_results.json}}{table.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Residual-stream probe accuracy across layers. The probe signal stays weak early and rises only in the latter half of the network.}}{3}{figure.1}\protected@file@percent }
+\newlabel{fig:probe-curve}{{1}{3}{Residual-stream probe accuracy across layers. The probe signal stays weak early and rises only in the latter half of the network}{figure.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Causal Intervention Results}{3}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Layer-level activation patching}{3}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Head-level patching and head-level probing}{3}{subsection.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Regularization-corrected probe results from \texttt  {artifacts/analysis/l2\_sweep\_results.json}.}}{4}{table.3}\protected@file@percent }
+\newlabel{tab:l2-sweep}{{3}{4}{Regularization-corrected probe results from \texttt {artifacts/analysis/l2\_sweep\_results.json}}{table.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces L2 sweep results. PCA provides most of the regularization benefit, and the corrected probing ceiling remains near 59\%.}}{4}{figure.2}\protected@file@percent }
+\newlabel{fig:l2-sweep}{{2}{4}{L2 sweep results. PCA provides most of the regularization benefit, and the corrected probing ceiling remains near 59\%}{figure.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Attention-vs-MLP decomposition}{4}{subsection.5.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Mean-ablation}{4}{subsection.5.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Layer-level activation patching results. No layer is sufficient to reliably flip incorrect predictions.}}{5}{figure.3}\protected@file@percent }
+\newlabel{fig:patching}{{3}{5}{Layer-level activation patching results. No layer is sufficient to reliably flip incorrect predictions}{figure.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Best per-head probe results from \texttt  {artifacts/analysis/head\_probe\_results.json}.}}{5}{table.4}\protected@file@percent }
+\newlabel{tab:head-probes}{{4}{5}{Best per-head probe results from \texttt {artifacts/analysis/head\_probe\_results.json}}{table.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Logit Lens and Failure Timing}{5}{section.6}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Head-level probe accuracy heatmap. Signal is weak and broadly distributed rather than concentrated in one standout head.}}{6}{figure.4}\protected@file@percent }
+\newlabel{fig:head-heatmap}{{4}{6}{Head-level probe accuracy heatmap. Signal is weak and broadly distributed rather than concentrated in one standout head}{figure.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Attention-vs-MLP sublayer patching. Neither sublayer type shows a reliable causal bottleneck.}}{6}{figure.5}\protected@file@percent }
+\newlabel{fig:mlp-attn}{{5}{6}{Attention-vs-MLP sublayer patching. Neither sublayer type shows a reliable causal bottleneck}{figure.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Discussion}{6}{section.7}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Mean-ablation on candidate heads. Even targeted removal of the strongest heads has minimal behavioral effect.}}{7}{figure.6}\protected@file@percent }
+\newlabel{fig:ablation}{{6}{7}{Mean-ablation on candidate heads. Even targeted removal of the strongest heads has minimal behavioral effect}{figure.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Aggregate logit-lens trajectory statistics from \texttt  {results\_download/logit\_lens/logit\_lens\_summary.json}.}}{7}{table.5}\protected@file@percent }
+\newlabel{tab:logit-lens}{{5}{7}{Aggregate logit-lens trajectory statistics from \texttt {results\_download/logit\_lens/logit\_lens\_summary.json}}{table.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Conclusion}{7}{section.8}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Logit-lens trajectories for correct and incorrect examples. The preference for the final answer is dynamic rather than monotonic.}}{8}{figure.7}\protected@file@percent }
+\newlabel{fig:logit-lens}{{7}{8}{Logit-lens trajectories for correct and incorrect examples. The preference for the final answer is dynamic rather than monotonic}{figure.7}{}}
+\gdef \@abspage@last{8}

@@ -1,0 +1,97 @@
+\begin{thebibliography}{14}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Belinkov(2022)]{belinkov2022probing}
+Yonatan Belinkov.
+\newblock Probing classifiers: Promises, shortcomings, and advances.
+\newblock volume~48, 2022.
+
+\bibitem[Bisk et~al.(2020)Bisk, Zellers, Le~Bras, Gao, and Choi]{bisk2020piqa}
+Yonatan Bisk, Rowan Zellers, Ronan Le~Bras, Jianfeng Gao, and Yejin Choi.
+\newblock {PIQA}: Reasoning about physical commonsense in natural language.
+\newblock In \emph{Proceedings of the AAAI Conference on Artificial
+  Intelligence}, 2020.
+
+\bibitem[Conmy et~al.(2023)Conmy, Mavor-Parker, Lynch, Heimersheim, and
+  Garriga-Alonso]{conmy2023towards}
+Arthur Conmy, Augustine~N Mavor-Parker, Aengus Lynch, Stefan Heimersheim, and
+  Adri{\`a} Garriga-Alonso.
+\newblock Towards automated circuit discovery for mechanistic interpretability.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~36, 2023.
+
+\bibitem[Davis \& Marcus(2023)Davis and Marcus]{davis2023commonsense}
+Ernest Davis and Gary Marcus.
+\newblock Commonsense reasoning for large language models.
+\newblock 2023.
+
+\bibitem[Elhage et~al.(2021)Elhage, Nanda, Olsson, Henighan, Joseph, Mann,
+  Askell, Bai, Chen, Conerly, et~al.]{elhage2021mathematical}
+Nelson Elhage, Neel Nanda, Catherine Olsson, Tom Henighan, Nicholas Joseph, Ben
+  Mann, Amanda Askell, Yuntao Bai, Anna Chen, Tom Conerly, et~al.
+\newblock A mathematical framework for transformer circuits.
+\newblock In \emph{Transformer Circuits Thread}, 2021.
+
+\bibitem[Geva et~al.(2023)Geva, Bastings, Filippova, and
+  Globerson]{geva2023dissecting}
+Mor Geva, Jasmijn Bastings, Katja Filippova, and Amir Globerson.
+\newblock Dissecting recall of factual associations in {GPT} models.
+\newblock In \emph{Proceedings of the 2023 Conference on Empirical Methods in
+  Natural Language Processing}, 2023.
+
+\bibitem[Meng et~al.(2022)Meng, Bau, Andonian, and Belinkov]{meng2022locating}
+Kevin Meng, David Bau, Alex Andonian, and Yonatan Belinkov.
+\newblock Locating and editing factual associations in {GPT}.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~35, 2022.
+
+\bibitem[{Modal Labs}(2023)]{modal2023}
+{Modal Labs}.
+\newblock Modal: Serverless cloud for ai and data, 2023.
+\newblock URL \url{https://modal.com}.
+
+\bibitem[Nanda \& Bloom(2022)Nanda and Bloom]{nanda2022transformerlens}
+Neel Nanda and Joseph Bloom.
+\newblock {TransformerLens}: A library for mechanistic interpretability of
+  {GPT}-style language models, 2022.
+\newblock URL \url{https://github.com/TransformerLensOrg/TransformerLens}.
+
+\bibitem[nostalgebraist(2020)]{nostalgebraist2020logitlens}
+nostalgebraist.
+\newblock Interpreting {GPT}: The logit lens.
+\newblock 2020.
+\newblock LessWrong blog post.
+
+\bibitem[{Qwen Team}(2025)]{qwen3}
+{Qwen Team}.
+\newblock {Qwen3} technical report, 2025.
+
+\bibitem[Singh et~al.(2021)Singh, Wen, Hou, Alipoormolabashi, Wu, Ma, and
+  Peng]{singh2021com2sense}
+Shikhar Singh, Nuan Wen, Yu~Hou, Pegah Alipoormolabashi, Te-Lin Wu, Xuezhe Ma,
+  and Nanyun Peng.
+\newblock {Com2Sense}: A commonsense reasoning benchmark with complementary
+  sentences.
+\newblock In \emph{Findings of the Association for Computational Linguistics:
+  ACL-IJCNLP}, 2021.
+
+\bibitem[Wang et~al.(2023)Wang, Variengien, Conmy, Shlegeris, and
+  Steinhardt]{wang2022interpretability}
+Kevin Wang, Alexandre Variengien, Arthur Conmy, Buck Shlegeris, and Jacob
+  Steinhardt.
+\newblock Interpretability in the wild: a circuit for indirect object
+  identification in {GPT-2} small.
+\newblock In \emph{International Conference on Learning Representations}, 2023.
+
+\bibitem[Zellers et~al.(2019)Zellers, Holtzman, Bisk, Farhadi, and
+  Choi]{zellers2019hellaswag}
+Rowan Zellers, Ari Holtzman, Yonatan Bisk, Ali Farhadi, and Yejin Choi.
+\newblock {HellaSwag}: Can a machine really finish your sentence?
+\newblock In \emph{Proceedings of the 57th Annual Meeting of the Association
+  for Computational Linguistics}, 2019.
+
+\end{thebibliography}
