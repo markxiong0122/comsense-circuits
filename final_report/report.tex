@@ -41,7 +41,7 @@ We present a systematic mechanistic interpretability study of commonsense reason
 Starting from 611 \emph{asymmetric pairs}---where the model answers one member of a complementary pair correctly and the other incorrectly---we conduct a five-phase investigation combining residual-stream probing, activation patching, head-level analysis, mean-ablation, logit-lens trajectory analysis, and MLP/attention sublayer decomposition.
 Our central finding is that commonsense reasoning failures are \emph{fundamentally distributed}: no single layer or attention head is sufficient (0\% flip rate under activation patching across 18 layers and 160 head-layer combinations) or necessary (maximum 1\% flip rate under mean-ablation of 17 candidate heads) for correct commonsense predictions.
 Probing accuracy plateaus at ${\sim}59$\% even with optimal regularization, and layer-by-layer logit-lens trajectories reveal that 76.5\% of incorrect predictions are already directionally wrong at layer~0, with the wrong answer consolidating stably around layer~20.
-These results contrast sharply with prior mechanistic work on factual recall, where localized circuits with 30--60\%+ flip rates are the norm, and suggest that commonsense reasoning requires a fundamentally different diagnostic and repair strategy than surgical circuit-level intervention.
+These results contrast sharply with prior mechanistic work on factual recall, where localized circuits yield high flip rates, and suggest that commonsense reasoning requires a fundamentally different diagnostic and repair strategy than surgical circuit-level intervention.
 \end{abstract}
 
 %=============================================================================
@@ -51,7 +51,7 @@ These results contrast sharply with prior mechanistic work on factual recall, wh
 
 Large language models achieve impressive scores on many commonsense benchmarks, yet still fail on surprising cases that seem trivial to humans~\citep{davis2023commonsense}.
 Understanding \emph{why} these failures occur---and where in the model they originate---is a central challenge for mechanistic interpretability.
-Prior work has successfully localized factual recall circuits in GPT-2 and related models~\citep{wang2022interpretability, geva2023dissecting, meng2022locating}, demonstrating that specific attention heads and MLP layers mediate factual associations with patching flip rates of 30--60\%+.
+Prior work has successfully localized factual recall circuits in GPT-2 and related models~\citep{wang2022interpretability, geva2023dissecting, meng2022locating}, demonstrating that specific attention heads and MLP layers mediate factual associations with high patching flip rates.
 Commonsense reasoning, however, presents a structurally different challenge: unlike factual associations that can be attributed to specific (subject, relation, object) triples, commonsense judgments require integrating world knowledge, physical intuition, temporal reasoning, and social understanding that may be encoded in a distributed, non-local manner.
 
 We ask three questions:
@@ -65,10 +65,25 @@ To answer these questions, we evaluate Qwen3-8B~\citep{qwen3} on Com2Sense~\cite
 The model achieves 70.25\% overall accuracy, identifying 611 \emph{asymmetric pairs} where it answers one member correctly and the other incorrectly.
 We use 200 of these pairs---selected for high wrong-answer confidence---as the substrate for mechanistic analysis across five complementary techniques: residual-stream probing, activation patching (layer-level, head-level, and sublayer-level), head-level probing, mean-ablation, and logit-lens trajectory analysis, all implemented via TransformerLens~\citep{nanda2022transformerlens}.
 
-Our main finding is that commonsense failures are \emph{fundamentally distributed}: patching any single layer or head produces at most ${\sim}1.5$\% prediction flips, probing any individual component achieves only ${\sim}59$\% accuracy, and logit-lens trajectories reveal a complex multi-stage failure process beginning at the earliest layers.
+Our main finding is that commonsense failures are \emph{fundamentally distributed}: layer-level and head-level patching produce 0\% prediction flips, sublayer-level (attention or MLP) patching achieves at most 1.5\%, probing any individual component achieves only ${\sim}59$\% accuracy, and logit-lens trajectories reveal a complex multi-stage failure process beginning at the earliest layers.
 This distinguishes commonsense from factual recall and has implications for how alignment-relevant commonsense deficits can be diagnosed and repaired.
 
 %=============================================================================
+\section{Background}
+\label{sec:background}
+%=============================================================================
+
+Modern transformer language models~\citep{Vaswani+2017} process input through a sequence of layers, each containing an attention sublayer and a feed-forward (MLP) sublayer whose outputs are added to a \emph{residual stream}---the running sum of all sublayer contributions that carries information forward through the network~\citep{elhage2021mathematical}.
+Mechanistic interpretability seeks to understand model behavior by analyzing this residual stream and the individual components that write to it.
+
+Several tools from this literature are central to our study.
+\emph{Linear probing}~\citep{belinkov2022probing} trains a classifier on residual-stream vectors to test whether a given property (e.g., the correct answer) is linearly decodable at each layer.
+\emph{Activation patching}~\citep{meng2022locating, wang2022interpretability} replaces a component's activation from one input with that from another, testing whether the component is \emph{sufficient} to change the model's prediction; \emph{mean-ablation} replaces it with the population mean to test \emph{necessity}.
+The \emph{logit lens}~\citep{nostalgebraist2020logitlens} projects the residual stream at each layer through the model's unembedding matrix, revealing how the predicted output token evolves layer by layer.
+
+Prior mechanistic work has shown that \emph{factual recall} is remarkably localized: \citet{geva2023dissecting} find that patching specific layers flips factual predictions 30--60\%+ of the time, and \citet{meng2022locating} show that editing a small number of MLP layers can reliably alter stored facts.
+Whether commonsense reasoning---which requires integrating world knowledge, temporal reasoning, and social understanding---admits similar localization is the question we investigate.
+
 %=============================================================================
 \section{Methodology}
 \label{sec:methods}
@@ -157,7 +172,7 @@ For mechanistic analysis, we select 200 pairs: 103 from the time domain, 50 temp
 
 \subsection{Representation probing}
 
-For each selected example we cache final-token \texttt{hook\_resid\_post} across all 36 layers and train logistic-regression probes with grouped 5-fold cross-validation, probing both correctness and ground truth.
+For each selected example we cache final-token \texttt{hook\_resid\_post} across all 36 layers and train logistic-regression probes with grouped 5-fold cross-validation (both members of each complementary pair are assigned to the same fold to prevent leakage from near-duplicate sentences), probing both correctness and ground truth.
 We test both raw features and PCA-50 and sweep $L_2$ regularization over $C \in \{0.001, 0.01, 0.1, 0.5, 1.0, 5.0, 10.0\}$.
 
 \subsection{Activation patching}
@@ -186,7 +201,7 @@ To make trajectories comparable across examples with different ground-truth labe
 
 Qwen3-8B achieves \textbf{70.25\% accuracy} on Com2Sense (1,679/2,390 correct).
 Table~\ref{tab:accuracy} breaks down performance by domain and scenario.
-The model performs best on physical statements (76.27\%) and worst on temporal ones (63.53\%), contrary to our initial hypothesis that physical-causal reasoning would be hardest.
+The model performs best on physical statements (76.27\%) and worst on temporal ones (63.53\%), suggesting that reasoning about temporal order and duration poses a greater challenge than physical-world knowledge for this model.
 
 \begin{table}[t]
 \centering
@@ -250,7 +265,7 @@ Table~\ref{tab:probing} summarizes the original probe results.
 \begin{table}[t]
 \centering
 \small
-\caption{Phase~2 probing results (original $C{=}1.0$ and $L_2$-corrected).}
+\caption{Phase~2 probing results (original $C{=}1.0$ and $L_2$-corrected). ``Layer'' column shows best layer before $\to$ after regularization correction.}
 \label{tab:probing}
 \begin{tabular}{lcccc}
 \toprule
@@ -273,6 +288,11 @@ The genuine probing signal is \textbf{${\sim}59$\%}---real but weak.
 \paragraph{Key finding.}
 The near-identical accuracy of the correctness probe (58.75\%) and ground-truth probe (59.25\%) after regularization is notable: the model's representation of \emph{what it will predict} is roughly as strong as its representation of \emph{what is actually true}.
 This means the model does not ``know'' the correct answer and fail to use it; it genuinely lacks a strong internal representation of commonsense truth.
+
+\paragraph{Position probing.}
+We also probed at the statement-end token position (last token of the statement, before the prompt suffix).
+The final token is stronger by ${\sim}3$\%: 60\% (layer~31) vs.\ 57.25\% (layer~28).
+This indicates that the model's commonsense judgment continues to develop through the prompt suffix tokens (``Is this True or False? Answer:''), and is not fully formed by the end of the statement itself.
 
 \begin{figure}[t]
 \centering
@@ -317,11 +337,6 @@ Crucially, \textbf{the most informative heads differ from the most causally infl
 \caption{\textbf{Left:} Top attention heads by mean absolute patching effect. Maximum effect is 0.147 (L20.H8); no head produces prediction flips. \textbf{Right:} Layer $\times$ head probing accuracy heatmap. Best individual head (59.5\%) matches full-stream accuracy, indicating the signal is redundantly distributed.}
 \label{fig:head_analysis}
 \end{figure}
-
-\paragraph{Position probing.}
-We also probed at the statement-end token position (last token of the statement, before the prompt suffix).
-The final token is stronger by ${\sim}3$\%: 60\% (layer~31) vs.\ 57.25\% (layer~28).
-This indicates that the model's commonsense judgment continues to develop through the prompt suffix tokens (``Is this True or False? Answer:''), and is not fully formed by the end of the statement itself.
 
 \paragraph{Mean-ablation.}
 Table~\ref{tab:ablation} shows the results of mean-ablating each of the 17 candidate heads on the 200 correct examples.
@@ -412,7 +427,7 @@ Temporal failures show the weakest final wrong-state ($-2.30$) but the lowest be
 
 \subsection{Phase 5: MLP vs.\ attention sublayer decomposition}
 
-To test whether commonsense signal concentrates in attention or MLP sublayers---as has been reported for PIQA-style tasks in GPT-2 Small---we decompose layer patching into separate \texttt{hook\_attn\_out} and \texttt{hook\_mlp\_out} interventions.
+To test whether commonsense signal concentrates in attention or MLP sublayers---as has been reported for physical-commonsense tasks on PIQA~\citep{bisk2020piqa} using GPT-2 Small~\citep{wang2022interpretability}---we decompose layer patching into separate \texttt{hook\_attn\_out} and \texttt{hook\_mlp\_out} interventions.
 
 Table~\ref{tab:sublayer} shows selected results.
 Unlike full \texttt{resid\_post} patching (uniformly negative), sublayer patching shows \emph{mixed signs}---some layers produce positive logit changes, others negative.
@@ -421,7 +436,7 @@ This sign variability reveals that the monotonically negative \texttt{resid\_pos
 \paragraph{Neither sublayer dominates.}
 The only prediction flips occur at L25~attention (1.5\% flip rate, $+0.163$ mean logit change---the largest positive intervention in the entire study) and L35~MLP (1.5\% flip rate, $+0.133$).
 Attention effects are larger in magnitude in middle layers (L19--L27), while MLP effects match or exceed attention only at L22--L23 and in late layers (L30--L35).
-This differs from the MLP-dominance pattern reported for GPT-2 Small on PIQA, likely reflecting both architectural differences (Qwen3-8B uses grouped-query attention) and task differences (Com2Sense requires multi-hop causal/temporal reasoning vs.\ PIQA's single-step physical intuition).
+This differs from the MLP-dominance pattern reported for GPT-2 Small on PIQA~\citep{bisk2020piqa, geva2021transformer}, likely reflecting both architectural differences (Qwen3-8B uses grouped-query attention) and task differences (Com2Sense requires multi-hop causal/temporal reasoning vs.\ PIQA's single-step physical intuition).
 
 \begin{table}[t]
 \centering
@@ -500,9 +515,9 @@ The near-zero flip rates we observe are dramatically lower than those reported f
 \toprule
 \textbf{Study} & \textbf{Task} & \textbf{Method} & \textbf{Flip rate} \\
 \midrule
-\citet{wang2022interpretability} & IOI (GPT-2) & Circuit patching & High \\
+\citet{wang2022interpretability} & IOI (GPT-2) & Circuit patching & $>$70\% \\
 \citet{geva2023dissecting} & Factual recall & Layer patching & 30--60\%+ \\
-\citet{meng2022locating} & Factual editing & ROME (MLP) & High \\
+\citet{meng2022locating} & Factual editing & ROME (MLP) & $>$95\% \\
 \textbf{This work} & Commonsense & Layer patching & \textbf{0\%} \\
 \textbf{This work} & Commonsense & Head patching & \textbf{0\%} \\
 \textbf{This work} & Commonsense & Sublayer patching & \textbf{1.5\%} \\
