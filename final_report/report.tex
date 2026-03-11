@@ -145,7 +145,7 @@ Figure~\ref{fig:pipeline} provides an overview of our five-phase experimental pi
 \draw[arrow] (p4) -- (p5);
 
 % Data flow labels
-\node[datalabel, above=0.25cm of p1] {Com2Sense\\2,390 pairs};
+\node[datalabel, above=0.25cm of p1] {Com2Sense\\2,390 examples};
 \node[datalabel, above=0.05cm of $(p1.east)!0.5!(p2.west)$] {\footnotesize 611 asym.};
 \node[datalabel, above=0.05cm of $(p2.east)!0.5!(p3.west)$] {\footnotesize 200 pairs};
 
@@ -341,7 +341,7 @@ Crucially, \textbf{the most informative heads differ from the most causally infl
 \paragraph{Mean-ablation.}
 Table~\ref{tab:ablation} shows the results of mean-ablating each of the 17 candidate heads on the 200 correct examples.
 The maximum flip rate is \textbf{1.0\%} (L26.H25, 2 flips out of 200), and the maximum absolute logit change is 0.028 (L18.H6)---negligible.
-No head is necessary for correct commonsense predictions.
+No head is necessary for correct commonsense predictions (selected results shown; see Appendix~\ref{app:ablation} for all 17 heads).
 This result complements the patching findings: patching tests sufficiency (no component is sufficient), while ablation tests necessity (no component is necessary).
 Together, they establish that commonsense reasoning is genuinely distributed.
 
@@ -427,7 +427,7 @@ Temporal failures show the weakest final wrong-state ($-2.30$) but the lowest be
 
 \subsection{Phase 5: MLP vs.\ attention sublayer decomposition}
 
-To test whether commonsense signal concentrates in attention or MLP sublayers---as has been reported for physical-commonsense tasks on PIQA~\citep{bisk2020piqa} using GPT-2 Small~\citep{wang2022interpretability}---we decompose layer patching into separate \texttt{hook\_attn\_out} and \texttt{hook\_mlp\_out} interventions.
+To test whether commonsense signal concentrates in attention or MLP sublayers---as a concurrent class project found MLP dominance for physical-commonsense tasks on PIQA~\citep{bisk2020piqa} using GPT-2 Small---we decompose layer patching into separate \texttt{hook\_attn\_out} and \texttt{hook\_mlp\_out} interventions.
 
 Table~\ref{tab:sublayer} shows selected results.
 Unlike full \texttt{resid\_post} patching (uniformly negative), sublayer patching shows \emph{mixed signs}---some layers produce positive logit changes, others negative.
@@ -436,7 +436,7 @@ This sign variability reveals that the monotonically negative \texttt{resid\_pos
 \paragraph{Neither sublayer dominates.}
 The only prediction flips occur at L25~attention (1.5\% flip rate, $+0.163$ mean logit change---the largest positive intervention in the entire study) and L35~MLP (1.5\% flip rate, $+0.133$).
 Attention effects are larger in magnitude in middle layers (L19--L27), while MLP effects match or exceed attention only at L22--L23 and in late layers (L30--L35).
-This differs from the MLP-dominance pattern reported for GPT-2 Small on PIQA~\citep{bisk2020piqa, geva2021transformer}, likely reflecting both architectural differences (Qwen3-8B uses grouped-query attention) and task differences (Com2Sense requires multi-hop causal/temporal reasoning vs.\ PIQA's single-step physical intuition).
+This differs from the MLP-dominance pattern found in the concurrent GPT-2 Small / PIQA study, likely reflecting both architectural differences (Qwen3-8B uses grouped-query attention) and task differences (Com2Sense requires multi-hop causal/temporal reasoning vs.\ PIQA's single-step physical intuition).
 
 \begin{table}[t]
 \centering
@@ -548,6 +548,7 @@ Probing accuracy plateaus at ${\sim}59$\%, indicating weak but genuine signal th
 
 These findings challenge the assumption that commonsense failures can be diagnosed and repaired through the same localized circuit-finding methodology that has proven successful for factual recall.
 Commonsense reasoning appears to require a fundamentally different treatment: strengthening the underlying representational encoding through training, rather than patching specific computational components after the fact.
+The stark contrast with prior localized findings likely reflects both architectural differences (Qwen3-8B's 36-layer grouped-query attention architecture vs.\ GPT-2 Small's 12-layer model) and dataset differences (Com2Sense's multi-hop causal and temporal judgments vs.\ single-fact retrieval tasks), suggesting that the degree of circuit localization depends heavily on the complexity of the reasoning required.
 
 \section*{Acknowledgments}
 We thank our advisor Darin Keng for guidance throughout this project.
